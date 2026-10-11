@@ -36,6 +36,11 @@ lerna-debug.log*
 .vite/
 *.tsbuildinfo
 
+# Pi local project instructions / private agent state
+.pi/
+AGENTS.md
+Agent.md
+
 # Test / coverage output
 coverage/
 .nyc_output/
