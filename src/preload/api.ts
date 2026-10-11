@@ -10,5 +10,13 @@ export const api: WindowApi = {
   },
   activity: {
     list: (input) => ipcRenderer.invoke(ipcChannels.activity.list, input)
+  },
+  quest: {
+    list: (input) => ipcRenderer.invoke(ipcChannels.quest.list, input),
+    create: (input) => ipcRenderer.invoke(ipcChannels.quest.create, input),
+    update: (input) => ipcRenderer.invoke(ipcChannels.quest.update, input),
+    complete: (id) => ipcRenderer.invoke(ipcChannels.quest.complete, id),
+    reopen: (id) => ipcRenderer.invoke(ipcChannels.quest.reopen, id),
+    delete: (id) => ipcRenderer.invoke(ipcChannels.quest.delete, id)
   }
 }
