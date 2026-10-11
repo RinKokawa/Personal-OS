@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="458" viewBox="0 0 1200 458" role="img" aria-label="Eight modular systems of Personal OS">
+<defs><pattern id="dots" width="21" height="21" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#244353"/></pattern></defs>
+<rect width="1200" height="458" fill="#0C1721"/>
+<rect width="1200" height="458" fill="url(#dots)" opacity=".48"/>
+<path d="M0 1H1200M0 457H1200" stroke="#426C76" opacity=".55"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="35" y="49" fill="#77F0D4" font-size="20" letter-spacing="3" font-weight="700">MODULE REGISTRY</text>
+<text x="1159" y="49" text-anchor="end" fill="#839FAF" font-size="12" letter-spacing="2">08 SYSTEM NODES // PLANNED</text>
+<text x="35" y="448" fill="#668692" font-size="10" letter-spacing="2">LOADING PROTOCOL : EXTENSIBLE BY DESIGN</text>
+</g>
+<g transform="translate(35 98)">
+<rect width="265" height="151" fill="#14232F" stroke="#355360"/>
+<path d="M0 18V0H39M226 151H265V133" fill="none" stroke="#75EBD1" stroke-width="2"/>
+<path d="M17 48H246" stroke="#284650"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="17" y="30" fill="#82A9B6" font-size="13" letter-spacing="1.2">01 / MODULE</text>
+<text x="17" y="96" fill="#F0F8F7" font-size="23" font-weight="700" letter-spacing="1.5">STATUS</text>
+<text x="17" y="121" fill="#9DB7C4" font-size="12">Host profile / telemetry</text></g>
+<g transform="translate(223 85)" fill="none" stroke-width="1.6"><circle cx="0" cy="0" r="19" stroke="#78ECD2"/><path d="M-26 0H26M0-26V26" stroke="#78ECD2" opacity=".6"/><circle r="5" fill="#78ECD2"/></g>
+</g><g transform="translate(318 98)">
+<rect width="265" height="151" fill="#14232F" stroke="#355360"/>
+<path d="M0 18V0H39M226 151H265V133" fill="none" stroke="#75EBD1" stroke-width="2"/>
+<path d="M17 48H246" stroke="#284650"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="17" y="30" fill="#82A9B6" font-size="13" letter-spacing="1.2">02 / MODULE</text>
+<text x="17" y="96" fill="#F0F8F7" font-size="23" font-weight="700" letter-spacing="1.5">QUEST</text>
+<text x="17" y="121" fill="#9DB7C4" font-size="12">Goals / tasks / progress</text></g>
+<g transform="translate(223 85)" fill="none" stroke-width="1.6"><rect x="-18" y="-19" width="36" height="38" rx="2" stroke="#78ECD2"/><path d="M-10 -2L-3 5L12 -10M-10 11H10" stroke="#78ECD2" stroke-width="2"/></g>
+</g><g transform="translate(601 98)">
+<rect width="265" height="151" fill="#14232F" stroke="#355360"/>
+<path d="M0 18V0H39M226 151H265V133" fill="none" stroke="#75EBD1" stroke-width="2"/>
+<path d="M17 48H246" stroke="#284650"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="17" y="30" fill="#82A9B6" font-size="13" letter-spacing="1.2">03 / MODULE</text>
+<text x="17" y="96" fill="#F0F8F7" font-size="23" font-weight="700" letter-spacing="1.5">JOURNAL</text>
+<text x="17" y="121" fill="#9DB7C4" font-size="12">Memory / writing / history</text></g>
+<g transform="translate(223 85)" fill="none" stroke-width="1.6"><path d="M-22 -21H11L22 -10V21H-22Z" stroke="#78ECD2"/><path d="M11 -21V-10H22M-13 -1H13M-13 9H6" stroke="#78ECD2"/></g>
+</g><g transform="translate(884 98)">
+<rect width="265" height="151" fill="#14232F" stroke="#355360"/>
+<path d="M0 18V0H39M226 151H265V133" fill="none" stroke="#75EBD1" stroke-width="2"/>
+<path d="M17 48H246" stroke="#284650"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="17" y="30" fill="#82A9B6" font-size="13" letter-spacing="1.2">04 / MODULE</text>
+<text x="17" y="96" fill="#F0F8F7" font-size="23" font-weight="700" letter-spacing="1.5">SKILLS</text>
+<text x="17" y="121" fill="#9DB7C4" font-size="12">Learning / capability map</text></g>
+<g transform="translate(223 85)" fill="none" stroke-width="1.6"><path d="M0 -23V-2M0 -2L-20 16M0 -2L20 16" stroke="#78ECD2"/><circle cx="0" cy="-23" r="6" fill="#163A43" stroke="#78ECD2"/><circle cx="-20" cy="16" r="7" stroke="#78ECD2"/><circle cx="20" cy="16" r="7" stroke="#78ECD2"/></g>
+</g><g transform="translate(35 266)">
+<rect width="265" height="151" fill="#14232F" stroke="#355360"/>
+<path d="M0 18V0H39M226 151H265V133" fill="none" stroke="#75EBD1" stroke-width="2"/>
+<path d="M17 48H246" stroke="#284650"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="17" y="30" fill="#82A9B6" font-size="13" letter-spacing="1.2">05 / MODULE</text>
+<text x="17" y="96" fill="#F0F8F7" font-size="23" font-weight="700" letter-spacing="1.5">INVENTORY</text>
+<text x="17" y="121" fill="#9DB7C4" font-size="12">Files / projects / resources</text></g>
+<g transform="translate(223 85)" fill="none" stroke-width="1.6"><rect x="-23" y="-23" width="19" height="19" stroke="#78ECD2"/><rect x="4" y="-23" width="19" height="19" stroke="#78ECD2"/><rect x="-23" y="4" width="19" height="19" stroke="#78ECD2"/><rect x="4" y="4" width="19" height="19" stroke="#78ECD2"/></g>
+</g><g transform="translate(318 266)">
+<rect width="265" height="151" fill="#14232F" stroke="#355360"/>
+<path d="M0 18V0H39M226 151H265V133" fill="none" stroke="#75EBD1" stroke-width="2"/>
+<path d="M17 48H246" stroke="#284650"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="17" y="30" fill="#82A9B6" font-size="13" letter-spacing="1.2">06 / MODULE</text>
+<text x="17" y="96" fill="#F0F8F7" font-size="23" font-weight="700" letter-spacing="1.5">ABILITIES</text>
+<text x="17" y="121" fill="#9DB7C4" font-size="12">Tools / automation / workflows</text></g>
+<g transform="translate(223 85)" fill="none" stroke-width="1.6"><path d="M5 -28L-20 5H-2L-9 28L22 -9H2Z" stroke="#78ECD2" stroke-width="2"/></g>
+</g><g transform="translate(601 266)">
+<rect width="265" height="151" fill="#14232F" stroke="#355360"/>
+<path d="M0 18V0H39M226 151H265V133" fill="none" stroke="#75EBD1" stroke-width="2"/>
+<path d="M17 48H246" stroke="#284650"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="17" y="30" fill="#82A9B6" font-size="13" letter-spacing="1.2">07 / MODULE</text>
+<text x="17" y="96" fill="#F0F8F7" font-size="23" font-weight="700" letter-spacing="1.5">AGENT</text>
+<text x="17" y="121" fill="#9DB7C4" font-size="12">Delegation / sessions / review</text></g>
+<g transform="translate(223 85)" fill="none" stroke-width="1.6"><circle cx="0" cy="-5" r="19" stroke="#78ECD2"/><path d="M-11 -5H-6M6 -5H11M-8 7Q0 13 8 7M-28 -5H-23M23 -5H28M-20 19L-27 26M20 19L27 26" stroke="#78ECD2" stroke-width="2"/></g>
+</g><g transform="translate(884 266)">
+<rect width="265" height="151" fill="#14232F" stroke="#355360"/>
+<path d="M0 18V0H39M226 151H265V133" fill="none" stroke="#75EBD1" stroke-width="2"/>
+<path d="M17 48H246" stroke="#284650"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="17" y="30" fill="#82A9B6" font-size="13" letter-spacing="1.2">08 / MODULE</text>
+<text x="17" y="96" fill="#F0F8F7" font-size="23" font-weight="700" letter-spacing="1.5">SYSTEM</text>
+<text x="17" y="121" fill="#9DB7C4" font-size="12">Storage / privacy / permission</text></g>
+<g transform="translate(223 85)" fill="none" stroke-width="1.6"><circle r="22" stroke="#78ECD2"/><circle r="10" stroke="#78ECD2"/><path d="M0 -29V-17M0 17V29M-29 0H-17M17 0H29M-21 -21L-13 -13M21 21L13 13M21 -21L13 -13M-21 21L-13 13" stroke="#78ECD2" stroke-width="2"/></g>
+</g>
+</svg>

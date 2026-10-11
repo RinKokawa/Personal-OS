@@ -1,6 +1,23 @@
-# PERSONAL OS
+<div align="center">
+  <img src="./assets/readme/system-awakening.svg" width="100%" alt="Personal OS — System Awakening" />
 
-**The System Is Now Online.**
+  <h1>PERSONAL OS</h1>
+
+  <p><strong>[ SYSTEM INITIALIZATION // PRE-ALPHA ]</strong></p>
+
+  <p>一个用于构建专属个人系统的本地优先、可扩展桌面框架。</p>
+
+  <p><code>LOCAL FIRST</code> · <code>MODULAR</code> · <code>AGENT-READY / PLANNED</code></p>
+
+  <p><strong>Your System. Your Rules. Your Story.</strong></p>
+</div>
+
+> [!NOTE]
+> **当前状态：PRE-ALPHA。** 仓库已经建立 Electron + Vue 3 + TypeScript 的工程骨架与初步页面；任务持久化、日记数据库、插件 SDK、Agent 执行等核心能力仍处于开发计划中。下文的「系统」为产品设计愿景，不表示全部功能已经实现。
+
+---
+
+**[ SYSTEM BOOT SEQUENCE ]**
 
 > **[ SYSTEM INITIALIZATION ]**
 >
@@ -55,6 +72,12 @@
 > 从某种意义上说，这已经足够接近超能力。
 
 ---
+
+<div align="center">
+  <img src="./assets/readme/module-registry.svg" width="100%" alt="Planned modules: Status, Quest, Journal, Skills, Inventory, Abilities, Agent, System" />
+</div>
+
+> **[ MODULE REGISTRY ]** 以下为系统模块的设计蓝图。每位宿主都可以对这些能力进行组合、替换或自行开发。
 
 ## 02. 宿主档案 / STATUS
 
@@ -280,6 +303,12 @@ AI Agent 是 Personal OS 的重要组成部分，但并不是系统本身。
 
 Personal OS 计划作为 Windows 本地桌面应用运行，并提供开机启动、系统托盘和后台任务能力。
 
+<div align="center">
+  <img src="./assets/readme/system-topology.svg" width="100%" alt="Proposed architecture: Electron/Vue interface, core, module SDK, agent bridge and local data" />
+</div>
+
+> **[ ARCHITECTURE NOTE ]** 上图为目标架构，并非当前已交付的完整实现。系统计划将宿主界面、内核、模块和 Agent 适配层分离。
+
 ### 技术栈
 
 | 模块          | 技术                              |
@@ -312,9 +341,26 @@ Personal OS 的核心数据将默认保存在本地设备中，并计划提供�
 
 ---
 
+### 启动开发环境 / BOOT SEQUENCE
+
+当前仓库已有 Electron + Vue 3 + TypeScript 工程骨架，可用于继续开发系统内核。
+
+```bash
+git clone https://github.com/RinKokawa/Personal-OS.git
+cd Personal-OS
+npm ci
+npm run dev
+```
+
+工程检查命令：`npm run typecheck`、`npm run lint`、`npm run build`。
+
+> **[ SYSTEM NOTICE ]** 以上命令用于运行当前开发骨架，并不意味着日记、任务、Agent 等规划功能已经完成。详细执行顺序参阅 [WORK PLAN](./docs/WORK_PLAN.md)。
+
+---
+
 ## 10. 系统升级 / ROADMAP
 
-**当前开发状态：PRE-ALPHA — 系统设计阶段。**
+**当前开发状态：PRE-ALPHA — 工程骨架已建立，核心能力开发中。**
 
 以下为计划中的能力，不代表已经实现。
 
@@ -417,4 +463,8 @@ Personal OS 的核心数据将默认保存在本地设备中，并计划提供�
 
 **祝你好运，宿主。**
 
-_Personal OS — Make Your Life Observable, Your Goals Actionable, and Your Abilities Extensible._
+<div align="center">
+  <img src="./assets/readme/worldline.svg" width="100%" alt="Fork the core. Write your own worldline." />
+
+  <sub>Personal OS · Your System. Your Rules. Your Story.</sub>
+</div>

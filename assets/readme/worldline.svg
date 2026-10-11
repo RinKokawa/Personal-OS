@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="154" viewBox="0 0 1200 154" role="img" aria-label="Fork the core. Write your own worldline.">
+<rect width="1200" height="154" fill="#0B1620"/>
+<path d="M0 1H1200M0 153H1200" stroke="#376874" stroke-width="2"/>
+<path d="M22 32V18H210M1178 120V136H990" fill="none" stroke="#74E8D0" stroke-opacity=".8" stroke-width="2"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="52" y="66" fill="#F0F9F8" font-weight="700" font-size="35" letter-spacing="3">FORK THE CORE.</text>
+<text x="52" y="112" fill="#72E9CF" font-weight="700" font-size="35" letter-spacing="3">WRITE YOUR OWN WORLDLINE.</text>
+<text x="1147" y="65" text-anchor="end" fill="#7C9BA6" font-size="12" letter-spacing="2">[ END OF TRANSMISSION ]</text>
+<text x="1147" y="90" text-anchor="end" fill="#5F8190" font-size="12">PERSONAL OS // HOST PROTOCOL</text>
+</g>
+</svg>
