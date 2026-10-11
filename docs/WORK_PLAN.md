@@ -207,7 +207,7 @@ V0.1 任务：
 
 验收标准：
 
-- [ ] STATUS 页面读取真实 Quest 与 Journal 数据。
+- [ ] STATUS 页面读取真实 Quest 与 Journal 数据。（Quest 已接入，Journal 待接入）
 - [ ] 最近活动来自 `activity_logs`。
 
 ## 9. M6 · 桌面能力 / DESKTOP NATIVE
@@ -286,7 +286,7 @@ V0.1 任务：
 1. 验证 Electron 环境下 `better-sqlite3` 安装、重建和打包。
 2. 完善 QUEST 编辑、截止日期和今日筛选。
 3. 实现 JOURNAL Markdown 保存。
-4. STATUS 接入真实任务和日志统计。
+4. JOURNAL 完成后，STATUS 接入真实日志统计。
 5. 再补命令面板、启动序列和状态栏体验。
 
 ## 13. 风险与待确认

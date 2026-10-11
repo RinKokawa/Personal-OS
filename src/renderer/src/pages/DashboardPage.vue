@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { NButton, NProgress } from 'naive-ui'
 import PageHeader from '@renderer/components/PageHeader.vue'
 import type { ActivityLog } from '../../../shared/models/activity'
+import type { Quest } from '../../../shared/models/quest'
 
+const router = useRouter()
 const activityLogs = ref<ActivityLog[]>([])
+const quests = ref<Quest[]>([])
 
 const fallbackLogs = [
   '正在识别宿主……',
@@ -13,6 +17,21 @@ const fallbackLogs = [
   '正在初始化辅助智能……',
   '系统初始化完成。欢迎回来，宿主。'
 ]
+
+const openQuests = computed(() => quests.value.filter((quest) => quest.status !== 'done'))
+const completedQuests = computed(() => quests.value.filter((quest) => quest.status === 'done'))
+const priorityQuests = computed(() => {
+  const weight = { urgent: 4, high: 3, normal: 2, low: 1 }
+  return [...openQuests.value]
+    .sort(
+      (a, b) => weight[b.priority] - weight[a.priority] || b.createdAt.localeCompare(a.createdAt)
+    )
+    .slice(0, 5)
+})
+const questProgress = computed(() => {
+  if (quests.value.length === 0) return 0
+  return Math.round((completedQuests.value.length / quests.value.length) * 100)
+})
 
 const timelineLogs = computed(() => {
   if (activityLogs.value.length === 0) {
@@ -25,26 +44,43 @@ const timelineLogs = computed(() => {
   }))
 })
 
-const metrics = [
-  { label: 'QUESTS COMPLETE', value: '00 / 00', foot: '任务数据库即将上线' },
+const metrics = computed(() => [
+  {
+    label: 'QUESTS COMPLETE',
+    value: `${String(completedQuests.value.length).padStart(2, '0')} / ${String(quests.value.length).padStart(2, '0')}`,
+    foot: openQuests.value.length ? `${openQuests.value.length} 项任务待完成` : '任务队列已清空'
+  },
   { label: 'ABILITIES LOADED', value: '07', foot: '系统模块已挂载' },
   { label: 'JOURNAL ENTRIES', value: '00', foot: '等待第一条系统日志' },
   { label: 'AGENT PROCESSES', value: '00', foot: '待授权 / 安全待机' }
-]
+])
 
 const quickAbilities = [
-  ['AI ASSISTANT', 'DEMO MODE'],
-  ['QUICK NOTE', 'READY'],
-  ['DATA EXPORT', 'LOCAL ONLY']
+  ['AI ASSISTANT', 'DEMO MODE', '/agent-hub'],
+  ['QUICK NOTE', 'READY', '/journal'],
+  ['DATA EXPORT', 'LOCAL ONLY', '/settings']
 ]
 
-onMounted(async () => {
-  const result = await window.api.activity.list({ limit: 5 })
+function priorityLabel(priority: Quest['priority']): string {
+  return priority.toUpperCase()
+}
 
-  if (result.ok) {
-    activityLogs.value = result.data
+async function loadDashboard(): Promise<void> {
+  const [activityResult, questResult] = await Promise.all([
+    window.api.activity.list({ limit: 5 }),
+    window.api.quest.list({ status: 'all' })
+  ])
+
+  if (activityResult.ok) {
+    activityLogs.value = activityResult.data
   }
-})
+
+  if (questResult.ok) {
+    quests.value = questResult.data
+  }
+}
+
+onMounted(loadDashboard)
 </script>
 
 <template>
@@ -67,7 +103,8 @@ onMounted(async () => {
           欢迎回来，<span class="text-cyan-200">宿主。</span>
         </h2>
         <p class="mt-4 max-w-xl text-sm leading-7 text-slate-400">
-          系统内核运行正常。SQLite 数据层已经接入，活动日志正在记录系统状态。请选择你的下一项行动。
+          系统内核运行正常。SQLite 数据层已经接入，QUEST
+          与活动日志正在记录真实状态。请选择你的下一项行动。
         </p>
         <div
           class="mt-7 flex items-center gap-3 font-mono text-[10px] tracking-[0.16em] text-cyan-200"
@@ -119,20 +156,36 @@ onMounted(async () => {
             <div class="label-line">PRIORITY QUEUE</div>
             <h3 class="mt-2 text-base font-semibold text-white">当前任务</h3>
           </div>
-          <NButton secondary>查看全部 →</NButton>
+          <NButton secondary @click="router.push('/todo')">查看全部 →</NButton>
         </div>
         <div
+          v-if="priorityQuests.length === 0"
           class="rounded border border-dashed border-cyan-200/15 px-6 py-10 text-center text-sm text-slate-500"
         >
-          QUEST 数据库正在装填。下一步将解锁创建、完成和筛选任务。
+          当前没有待执行任务。前往 QUEST 发布新的行动指令。
+        </div>
+        <div v-else class="divide-y divide-cyan-200/10">
+          <div v-for="quest in priorityQuests" :key="quest.id" class="flex items-center gap-4 py-3">
+            <div class="h-4 w-4 shrink-0 border border-slate-600"></div>
+            <div class="min-w-0 flex-1">
+              <div class="truncate text-sm text-slate-100">{{ quest.title }}</div>
+              <div class="mt-1 font-mono text-[10px] text-slate-500">
+                {{ quest.type.toUpperCase() }} /
+                {{ new Date(quest.createdAt).toLocaleString('zh-CN') }}
+              </div>
+            </div>
+            <span class="border border-cyan-200/15 px-2 py-1 font-mono text-[9px] text-cyan-200">
+              {{ priorityLabel(quest.priority) }}
+            </span>
+          </div>
         </div>
         <div
           class="mt-5 flex items-center justify-between font-mono text-[10px] tracking-[0.12em] text-slate-400"
         >
           <span>QUEST PROGRESS</span>
-          <span>0% COMPLETE</span>
+          <span>{{ questProgress }}% COMPLETE</span>
         </div>
-        <NProgress class="mt-2" type="line" :percentage="0" :show-indicator="false" />
+        <NProgress class="mt-2" type="line" :percentage="questProgress" :show-indicator="false" />
       </section>
 
       <section class="border border-cyan-200/10 bg-[#101923]/80 p-6">
@@ -141,13 +194,14 @@ onMounted(async () => {
             <div class="label-line">AVAILABLE ABILITIES</div>
             <h3 class="mt-2 text-base font-semibold text-white">快速调用</h3>
           </div>
-          <NButton secondary>所有模块 →</NButton>
+          <NButton secondary @click="router.push('/toolbox')">所有模块 →</NButton>
         </div>
         <div class="grid gap-3 md:grid-cols-3">
           <button
             v-for="ability in quickAbilities"
             :key="ability[0]"
             class="border border-cyan-200/10 bg-[#14222d] px-4 py-6 text-center transition hover:-translate-y-0.5 hover:border-cyan-200/50 hover:bg-cyan-200/[0.06]"
+            @click="router.push(ability[2])"
           >
             <div class="text-2xl text-cyan-200">✦</div>
             <div class="mt-3 text-xs font-semibold text-slate-200">{{ ability[0] }}</div>
@@ -180,6 +234,10 @@ onMounted(async () => {
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">
             <span class="text-slate-400">数据来源</span
             ><span class="font-mono text-cyan-200">LOCAL SQLITE</span>
+          </div>
+          <div class="flex justify-between border-t border-cyan-200/10 pt-3">
+            <span class="text-slate-400">任务进度</span
+            ><span class="font-mono text-cyan-200">{{ questProgress }}%</span>
           </div>
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">
             <span class="text-slate-400">运行时状态</span
