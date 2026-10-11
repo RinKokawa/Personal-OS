@@ -31,7 +31,70 @@ body {
   overflow-x: hidden;
 }
 
+body::selection {
+  background: rgba(121, 239, 218, 0.25);
+}
+
 a {
   color: inherit;
   text-decoration: none;
+}
+
+.system-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 65% 0%, rgba(51, 87, 104, 0.18), transparent 45%),
+    linear-gradient(90deg, transparent 95%, rgba(100, 154, 169, 0.03) 95%),
+    linear-gradient(0deg, transparent 95%, rgba(100, 154, 169, 0.03) 95%);
+  background-size:
+    auto,
+    36px 36px,
+    36px 36px;
+}
+
+.system-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+.boot-grid {
+  background-image:
+    linear-gradient(rgba(101, 154, 169, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(101, 154, 169, 0.1) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, transparent, black 25%, black 80%, transparent);
+}
+
+.system-grid-small {
+  background-image:
+    linear-gradient(90deg, transparent 96%, rgba(121, 239, 218, 0.08) 100%),
+    linear-gradient(transparent 96%, rgba(121, 239, 218, 0.08) 100%);
+  background-size: 28px 28px;
+}
+
+.label-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family:
+    Cascadia Code,
+    JetBrains Mono,
+    Consolas,
+    monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: #79efda;
+  text-transform: uppercase;
+}
+
+.label-line::before {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 1px;
+  background: #79efda;
 }
