@@ -33,7 +33,7 @@
 
 ### V0.1 必须完成
 
-- [ ] Electron 桌面应用基础
+- [x] Electron 桌面应用基础
 - [ ] 主界面与系统状态面板
 - [ ] QUEST：Todo 与基础任务管理
 - [ ] JOURNAL：Markdown 日志编辑与本地保存
@@ -72,8 +72,8 @@
 验收标准：
 
 - [ ] `npm run dev` 可正常启动。
-- [ ] `npm run typecheck` 通过。
-- [ ] `npm run lint` 通过。
+- [x] `npm run typecheck` 通过。
+- [x] `npm run lint` 通过。
 - [ ] README、工作计划、架构文档互相一致。
 
 ## 4. M1 · 系统核心 / SYSTEM CORE
@@ -115,7 +115,7 @@ PersonalOS/
 任务：
 
 - [x] 引入 SQLite 与 Drizzle ORM。
-- [ ] 验证 Electron 环境下 `better-sqlite3` 安装、重建和打包。
+- [x] 验证 Electron 环境下 `better-sqlite3` 安装、重建和打包。
 - [x] 建立数据目录初始化逻辑。
 - [x] 建立数据库迁移机制。
 - [x] 建立备份目录。
@@ -153,18 +153,18 @@ PersonalOS/
 V0.1 任务：
 
 - [x] 创建任务。
-- [ ] 编辑任务。
+- [x] 编辑任务。
 - [x] 完成/取消完成任务。
 - [x] 删除任务。
 - [x] 设置优先级。
-- [ ] 设置截止日期。
-- [ ] 基础排序。
-- [x] 筛选：全部、未完成、已完成。
+- [x] 设置截止日期。
+- [x] 基础排序。
+- [x] 筛选：全部、未完成、已完成、今日。
 - [x] 写入活动日志。
 
 验收标准：
 
-- [ ] 能完成 `创建 → 编辑 → 完成 → 筛选` 使用流。
+- [x] 能完成 `创建 → 编辑 → 完成 → 筛选` 使用流。
 - [ ] 重启应用后数据仍存在。
 - [ ] Dashboard/STATUS 能显示今日任务统计。
 
@@ -208,7 +208,7 @@ V0.1 任务：
 验收标准：
 
 - [x] STATUS 页面读取真实 Quest 与 Journal 数据。
-- [ ] 最近活动来自 `activity_logs`。
+- [x] 最近活动来自 `activity_logs`。
 
 ## 9. M6 · 桌面能力 / DESKTOP NATIVE
 
@@ -283,12 +283,9 @@ V0.1 任务：
 
 下一步不要继续急着美化 UI，先按以下顺序推进：
 
-1. 验证 Electron 环境下 `better-sqlite3` 安装、重建和打包。
-2. 完善 QUEST 编辑、截止日期和今日筛选。
-3. 实现 JOURNAL Markdown 保存。
-4. 完善 QUEST 编辑、截止日期和今日筛选。
-5. 为 JOURNAL 引入 Markdown 编辑器与基础搜索。
-6. 再补命令面板、启动序列和状态栏体验。
+1. 为 JOURNAL 引入 Markdown 编辑器与基础搜索。
+2. 接入 STATUS 最近活动时间线。
+3. 再补命令面板、启动序列和状态栏体验。
 
 ## 13. 风险与待确认
 
