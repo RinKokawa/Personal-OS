@@ -19,6 +19,7 @@ export interface JournalEntryWithContent extends JournalEntry {
 
 export interface ListJournalEntriesInput {
   limit?: number
+  query?: string
 }
 
 export interface SaveJournalEntryInput {

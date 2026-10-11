@@ -1,4 +1,4 @@
-import { desc, eq, isNull } from 'drizzle-orm'
+import { and, desc, eq, isNull, like, or } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
@@ -57,10 +57,18 @@ function wordCount(content: string): number {
 
 export function listJournalEntries(input: ListJournalEntriesInput = {}): JournalEntry[] {
   const limit = Math.min(Math.max(input.limit ?? 50, 1), 200)
+  const query = input.query?.trim()
+  const conditions = [isNull(journalEntries.deletedAt)]
+
+  if (query) {
+    const keyword = `%${query}%`
+    conditions.push(or(like(journalEntries.title, keyword), like(journalEntries.excerpt, keyword))!)
+  }
+
   const rows = getDb()
     .select()
     .from(journalEntries)
-    .where(isNull(journalEntries.deletedAt))
+    .where(and(...conditions))
     .orderBy(desc(journalEntries.entryDate), desc(journalEntries.updatedAt))
     .limit(limit)
     .all()
