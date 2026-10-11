@@ -32,3 +32,16 @@ export const quests = sqliteTable('quests', {
   canceledAt: text('canceled_at'),
   deletedAt: text('deleted_at')
 })
+
+export const journalEntries = sqliteTable('journal_entries', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  entryDate: text('entry_date').notNull(),
+  filePath: text('file_path').notNull(),
+  excerpt: text('excerpt'),
+  wordCount: integer('word_count').notNull().default(0),
+  source: text('source').notNull().default('user'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at')
+})

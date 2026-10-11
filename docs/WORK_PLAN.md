@@ -127,7 +127,7 @@ PersonalOS/
 - [ ] `app_settings`
 - [ ] `activity_logs`
 - [x] `quests`
-- [ ] `journal_entries`
+- [x] `journal_entries`
 - [ ] `resources`
 - [ ] `tags`
 - [ ] `entity_links`
@@ -175,20 +175,20 @@ V0.1 任务：
 任务：
 
 - [ ] 引入 Markdown 编辑器。
-- [ ] 按日期创建日志文件。
-- [ ] SQLite 保存元数据。
-- [ ] Markdown 文件保存正文。
-- [ ] 快速记录入口。
-- [ ] 日志列表。
-- [ ] 日志编辑。
+- [x] 按日期创建日志文件。
+- [x] SQLite 保存元数据。
+- [x] Markdown 文件保存正文。
+- [x] 快速记录入口。
+- [x] 日志列表。
+- [x] 日志编辑。
 - [ ] 基础搜索。
 - [ ] 日志与任务关联预留。
 
 验收标准：
 
-- [ ] 能创建今日日志。
-- [ ] 正文以 `.md` 文件保存。
-- [ ] 重启应用后可继续编辑。
+- [x] 能创建今日日志。
+- [x] 正文以 `.md` 文件保存。
+- [x] 重启应用后可继续编辑。
 - [ ] 能按关键词搜索日志。
 
 ## 8. M5 · 状态面板 / STATUS
@@ -207,7 +207,7 @@ V0.1 任务：
 
 验收标准：
 
-- [ ] STATUS 页面读取真实 Quest 与 Journal 数据。（Quest 已接入，Journal 待接入）
+- [x] STATUS 页面读取真实 Quest 与 Journal 数据。
 - [ ] 最近活动来自 `activity_logs`。
 
 ## 9. M6 · 桌面能力 / DESKTOP NATIVE
@@ -286,8 +286,9 @@ V0.1 任务：
 1. 验证 Electron 环境下 `better-sqlite3` 安装、重建和打包。
 2. 完善 QUEST 编辑、截止日期和今日筛选。
 3. 实现 JOURNAL Markdown 保存。
-4. JOURNAL 完成后，STATUS 接入真实日志统计。
-5. 再补命令面板、启动序列和状态栏体验。
+4. 完善 QUEST 编辑、截止日期和今日筛选。
+5. 为 JOURNAL 引入 Markdown 编辑器与基础搜索。
+6. 再补命令面板、启动序列和状态栏体验。
 
 ## 13. 风险与待确认
 

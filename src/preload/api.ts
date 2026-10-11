@@ -18,5 +18,10 @@ export const api: WindowApi = {
     complete: (id) => ipcRenderer.invoke(ipcChannels.quest.complete, id),
     reopen: (id) => ipcRenderer.invoke(ipcChannels.quest.reopen, id),
     delete: (id) => ipcRenderer.invoke(ipcChannels.quest.delete, id)
+  },
+  journal: {
+    list: (input) => ipcRenderer.invoke(ipcChannels.journal.list, input),
+    get: (id) => ipcRenderer.invoke(ipcChannels.journal.get, id),
+    save: (input) => ipcRenderer.invoke(ipcChannels.journal.save, input)
   }
 }

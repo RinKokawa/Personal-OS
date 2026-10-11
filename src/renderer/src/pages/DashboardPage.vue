@@ -4,11 +4,13 @@ import { useRouter } from 'vue-router'
 import { NButton, NProgress } from 'naive-ui'
 import PageHeader from '@renderer/components/PageHeader.vue'
 import type { ActivityLog } from '../../../shared/models/activity'
+import type { JournalEntry } from '../../../shared/models/journal'
 import type { Quest } from '../../../shared/models/quest'
 
 const router = useRouter()
 const activityLogs = ref<ActivityLog[]>([])
 const quests = ref<Quest[]>([])
+const journalEntries = ref<JournalEntry[]>([])
 
 const fallbackLogs = [
   '正在识别宿主……',
@@ -51,7 +53,11 @@ const metrics = computed(() => [
     foot: openQuests.value.length ? `${openQuests.value.length} 项任务待完成` : '任务队列已清空'
   },
   { label: 'ABILITIES LOADED', value: '07', foot: '系统模块已挂载' },
-  { label: 'JOURNAL ENTRIES', value: '00', foot: '等待第一条系统日志' },
+  {
+    label: 'JOURNAL ENTRIES',
+    value: String(journalEntries.value.length).padStart(2, '0'),
+    foot: journalEntries.value.length ? 'Markdown 记忆存档在线' : '等待第一条系统日志'
+  },
   { label: 'AGENT PROCESSES', value: '00', foot: '待授权 / 安全待机' }
 ])
 
@@ -66,9 +72,10 @@ function priorityLabel(priority: Quest['priority']): string {
 }
 
 async function loadDashboard(): Promise<void> {
-  const [activityResult, questResult] = await Promise.all([
+  const [activityResult, questResult, journalResult] = await Promise.all([
     window.api.activity.list({ limit: 5 }),
-    window.api.quest.list({ status: 'all' })
+    window.api.quest.list({ status: 'all' }),
+    window.api.journal.list({ limit: 100 })
   ])
 
   if (activityResult.ok) {
@@ -77,6 +84,10 @@ async function loadDashboard(): Promise<void> {
 
   if (questResult.ok) {
     quests.value = questResult.data
+  }
+
+  if (journalResult.ok) {
+    journalEntries.value = journalResult.data
   }
 }
 

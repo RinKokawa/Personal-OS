@@ -14,5 +14,10 @@ export const ipcChannels = {
     complete: 'quest:complete',
     reopen: 'quest:reopen',
     delete: 'quest:delete'
+  },
+  journal: {
+    list: 'journal:list',
+    get: 'journal:get',
+    save: 'journal:save'
   }
 } as const

@@ -51,6 +51,22 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_quests_type ON quests(type);
     CREATE INDEX IF NOT EXISTS idx_quests_due_at ON quests(due_at);
     CREATE INDEX IF NOT EXISTS idx_quests_parent_id ON quests(parent_id);
+
+    CREATE TABLE IF NOT EXISTS journal_entries (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      entry_date TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      excerpt TEXT,
+      word_count INTEGER NOT NULL DEFAULT 0,
+      source TEXT NOT NULL DEFAULT 'user',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_journal_entries_entry_date ON journal_entries(entry_date);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_journal_entries_file_path ON journal_entries(file_path);
   `)
 
   const now = new Date().toISOString()
@@ -60,4 +76,7 @@ export function runMigrations(): void {
   sqlite
     .prepare(`INSERT OR IGNORE INTO migrations (id, name, applied_at) VALUES (?, ?, ?)`)
     .run('0002_quests', 'Create quests table', now)
+  sqlite
+    .prepare(`INSERT OR IGNORE INTO migrations (id, name, applied_at) VALUES (?, ?, ?)`)
+    .run('0003_journal_entries', 'Create journal entries table', now)
 }
