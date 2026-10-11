@@ -62,10 +62,12 @@
 - [x] 建立工作计划文档。
 - [x] 接入 Naive UI、UnoCSS、Pinia、Vue Router。
 - [x] 搭建基础页面入口。
-- [ ] 将新版系统概念同步到 UI 命名与页面结构。
-- [ ] 建立 `docs/ARCHITECTURE.md`。
-- [ ] 建立 `docs/DATA_MODEL.md`。
-- [ ] 建立 `docs/PERMISSION_MODEL.md`。
+- [x] 将新版系统概念同步到 UI 命名与页面结构。
+- [x] 将交互原型归档到 `docs/personal-os-prototype.html`。
+- [x] 拆解交互原型并建立 `docs/DESIGN.md`。
+- [x] 建立 `docs/ARCHITECTURE.md`。
+- [x] 建立 `docs/DATA_MODEL.md`。
+- [x] 建立 `docs/PERMISSION_MODEL.md`。
 
 验收标准：
 
@@ -281,15 +283,14 @@ V0.1 任务：
 
 下一步不要继续急着美化 UI，先按以下顺序推进：
 
-1. 建立 `docs/ARCHITECTURE.md`。
-2. 建立 `docs/DATA_MODEL.md`。
-3. 建立 `docs/PERMISSION_MODEL.md`。
-4. 实现 IPC 类型边界。
-5. 实现本地数据目录初始化。
-6. 接入 SQLite + Drizzle。
-7. 实现 QUEST 最小 CRUD。
-8. 实现 JOURNAL Markdown 保存。
-9. 再回头完善 STATUS UI。
+1. 实现 IPC 类型边界。
+2. 实现本地数据目录初始化。
+3. 接入 SQLite + Drizzle。
+4. 先实现 `activity_logs`，用于承接任务、日志和系统事件。
+5. 实现 QUEST 最小 CRUD。
+6. 实现 JOURNAL Markdown 保存。
+7. STATUS 接入真实统计数据与最近活动。
+8. 再补命令面板、启动序列和状态栏体验。
 
 ## 13. 风险与待确认
 
