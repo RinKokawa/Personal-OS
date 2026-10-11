@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="343" viewBox="0 0 1200 343" role="img" aria-label="Proposed Personal OS system architecture">
+<defs><pattern id="p" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#263F4F" stroke-width=".65"/></pattern></defs>
+<rect width="1200" height="343" fill="#0A1520"/>
+<rect width="1200" height="343" fill="url(#p)" opacity=".5"/>
+<g font-family="Arial,Helvetica,sans-serif">
+<text x="35" y="50" fill="#7CF0D6" font-size="20" font-weight="700" letter-spacing="2.5">SYSTEM TOPOLOGY</text>
+<text x="1162" y="50" text-anchor="end" fill="#88A1AF" font-size="12" letter-spacing="1.8">PROPOSED ARCHITECTURE // NOT YET IMPLEMENTED</text>
+</g>
+<g transform="translate(34 113)">
+<rect width="256" height="127" fill="#162634" stroke="#3D606B"/>
+<path d="M0 0H55M0 0V28M256 127H204M256 127V99" stroke="#76EDD2" stroke-width="2" fill="none"/>
+<rect x="13" y="16" width="23" height="18" fill="#143E40" stroke="#79EBD0"/>
+<text x="24.5" y="29" font-size="11" fill="#7BF0D8" text-anchor="middle" font-family="Arial,Helvetica,sans-serif">01</text>
+<text x="14" y="70" fill="#EAF5F3" font-size="19" font-weight="700" font-family="Arial,Helvetica,sans-serif">HOST INTERFACE</text>
+<text x="14" y="96" fill="#9DB4C3" font-size="12" font-family="Arial,Helvetica,sans-serif">Electron / Vue 3</text>
+</g>
+<g transform="translate(331 113)">
+<rect width="256" height="127" fill="#162634" stroke="#3D606B"/>
+<path d="M0 0H55M0 0V28M256 127H204M256 127V99" stroke="#76EDD2" stroke-width="2" fill="none"/>
+<rect x="13" y="16" width="23" height="18" fill="#143E40" stroke="#79EBD0"/>
+<text x="24.5" y="29" font-size="11" fill="#7BF0D8" text-anchor="middle" font-family="Arial,Helvetica,sans-serif">02</text>
+<text x="14" y="70" fill="#EAF5F3" font-size="19" font-weight="700" font-family="Arial,Helvetica,sans-serif">SYSTEM CORE</text>
+<text x="14" y="96" fill="#9DB4C3" font-size="12" font-family="Arial,Helvetica,sans-serif">IPC / events / permissions</text>
+</g>
+<g transform="translate(628 113)">
+<rect width="256" height="127" fill="#162634" stroke="#3D606B"/>
+<path d="M0 0H55M0 0V28M256 127H204M256 127V99" stroke="#76EDD2" stroke-width="2" fill="none"/>
+<rect x="13" y="16" width="23" height="18" fill="#143E40" stroke="#79EBD0"/>
+<text x="24.5" y="29" font-size="11" fill="#7BF0D8" text-anchor="middle" font-family="Arial,Helvetica,sans-serif">03</text>
+<text x="14" y="70" fill="#EAF5F3" font-size="19" font-weight="700" font-family="Arial,Helvetica,sans-serif">MODULE SDK</text>
+<text x="14" y="96" fill="#9DB4C3" font-size="12" font-family="Arial,Helvetica,sans-serif">Custom extensions / UI</text>
+</g>
+<g transform="translate(925 113)">
+<rect width="256" height="127" fill="#162634" stroke="#3D606B"/>
+<path d="M0 0H55M0 0V28M256 127H204M256 127V99" stroke="#76EDD2" stroke-width="2" fill="none"/>
+<rect x="13" y="16" width="23" height="18" fill="#143E40" stroke="#79EBD0"/>
+<text x="24.5" y="29" font-size="11" fill="#7BF0D8" text-anchor="middle" font-family="Arial,Helvetica,sans-serif">04</text>
+<text x="14" y="70" fill="#EAF5F3" font-size="19" font-weight="700" font-family="Arial,Helvetica,sans-serif">AGENT BRIDGE</text>
+<text x="14" y="96" fill="#9DB4C3" font-size="12" font-family="Arial,Helvetica,sans-serif">Adapters / RPC / tools</text>
+</g>
+<g stroke="#77E9D1" stroke-width="1.5" fill="none" opacity=".8">
+<path d="M290 178H326M321 173L326 178L321 183"/>
+<path d="M587 178H623M618 173L623 178L618 183"/>
+<path d="M884 178H920M915 173L920 178L915 183"/>
+<path d="M460 240V278H590" stroke-dasharray="4 5"/>
+</g>
+<g transform="translate(589 260)"><rect x="0" y="0" width="285" height="57" fill="#112633" stroke="#397A76"/>
+<path d="M0 0H55" stroke="#79EDD1" stroke-width="2"/>
+<text x="17" y="24" fill="#DCEDEA" font-size="16" font-family="Arial,Helvetica,sans-serif" font-weight="700">LOCAL DATA VAULT</text>
+<text x="17" y="44" fill="#91ADB7" font-size="11" font-family="Arial,Helvetica,sans-serif">SQLite / Markdown / files (planned)</text></g>
+<path d="M35 316H525" stroke="#2D505E"/>
+<text x="35" y="331" font-family="Arial,Helvetica,sans-serif" fill="#668997" font-size="10" letter-spacing="1.8">PRIVACY BOUNDARY // HOST CONTROLS ACCESS</text>
+</svg>
