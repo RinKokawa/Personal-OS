@@ -20,14 +20,43 @@ const fallbackLogs = [
   '系统初始化完成。欢迎回来，宿主。'
 ]
 
+function isToday(value?: string | null): boolean {
+  if (!value) return false
+  const date = new Date(value)
+  const today = new Date()
+  return (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  )
+}
+
+function formatDueDate(value?: string | null): string {
+  if (!value) return 'NO DUE DATE'
+  return new Date(value).toLocaleDateString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit'
+  })
+}
+
 const openQuests = computed(() => quests.value.filter((quest) => quest.status !== 'done'))
 const completedQuests = computed(() => quests.value.filter((quest) => quest.status === 'done'))
+const todayQuests = computed(() => openQuests.value.filter((quest) => isToday(quest.dueAt)))
+const completedTodayQuests = computed(() =>
+  quests.value.filter((quest) => quest.status === 'done' && isToday(quest.dueAt))
+)
 const priorityQuests = computed(() => {
   const weight = { urgent: 4, high: 3, normal: 2, low: 1 }
   return [...openQuests.value]
-    .sort(
-      (a, b) => weight[b.priority] - weight[a.priority] || b.createdAt.localeCompare(a.createdAt)
-    )
+    .sort((a, b) => {
+      const leftDue = a.dueAt ? new Date(a.dueAt).getTime() : Number.POSITIVE_INFINITY
+      const rightDue = b.dueAt ? new Date(b.dueAt).getTime() : Number.POSITIVE_INFINITY
+      return (
+        leftDue - rightDue ||
+        weight[b.priority] - weight[a.priority] ||
+        b.createdAt.localeCompare(a.createdAt)
+      )
+    })
     .slice(0, 5)
 })
 const questProgress = computed(() => {
@@ -52,7 +81,13 @@ const metrics = computed(() => [
     value: `${String(completedQuests.value.length).padStart(2, '0')} / ${String(quests.value.length).padStart(2, '0')}`,
     foot: openQuests.value.length ? `${openQuests.value.length} 项任务待完成` : '任务队列已清空'
   },
-  { label: 'ABILITIES LOADED', value: '07', foot: '系统模块已挂载' },
+  {
+    label: 'TODAY QUESTS',
+    value: String(todayQuests.value.length).padStart(2, '0'),
+    foot: completedTodayQuests.value.length
+      ? `${completedTodayQuests.value.length} 项今日任务已完成`
+      : '今日任务信号待处理'
+  },
   {
     label: 'JOURNAL ENTRIES',
     value: String(journalEntries.value.length).padStart(2, '0'),
@@ -181,7 +216,7 @@ onMounted(loadDashboard)
             <div class="min-w-0 flex-1">
               <div class="truncate text-sm text-slate-100">{{ quest.title }}</div>
               <div class="mt-1 font-mono text-[10px] text-slate-500">
-                {{ quest.type.toUpperCase() }} /
+                {{ quest.type.toUpperCase() }} / DUE {{ formatDueDate(quest.dueAt) }} /
                 {{ new Date(quest.createdAt).toLocaleString('zh-CN') }}
               </div>
             </div>
@@ -249,6 +284,10 @@ onMounted(loadDashboard)
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">
             <span class="text-slate-400">任务进度</span
             ><span class="font-mono text-cyan-200">{{ questProgress }}%</span>
+          </div>
+          <div class="flex justify-between border-t border-cyan-200/10 pt-3">
+            <span class="text-slate-400">今日任务</span
+            ><span class="font-mono text-cyan-200">{{ todayQuests.length }} ACTIVE</span>
           </div>
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">
             <span class="text-slate-400">运行时状态</span
