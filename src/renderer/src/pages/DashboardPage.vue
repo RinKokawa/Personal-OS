@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import { NButton, NCard, NGrid, NGridItem, NStatistic, NTimeline, NTimelineItem } from 'naive-ui'
 import PageHeader from '@renderer/components/PageHeader.vue'
+import type { ActivityLog } from '../../../shared/models/activity'
 
 const bootLogs = [
   '正在识别宿主……',
@@ -9,6 +11,22 @@ const bootLogs = [
   '正在初始化辅助智能……',
   '系统初始化完成。欢迎回来，宿主。'
 ]
+
+const activityLogs = ref<ActivityLog[]>([])
+
+const timelineLogs = computed(() => {
+  if (activityLogs.value.length === 0) return bootLogs
+
+  return activityLogs.value.map((log) => `${log.title} // ${log.detail ?? log.action}`)
+})
+
+onMounted(async () => {
+  const result = await window.api.activity.list({ limit: 5 })
+
+  if (result.ok) {
+    activityLogs.value = result.data
+  }
+})
 </script>
 
 <template>
@@ -64,9 +82,9 @@ const bootLogs = [
       </div>
     </NCard>
 
-    <NCard title="BOOT SEQUENCE">
+    <NCard title="RECENT ACTIVITY">
       <NTimeline>
-        <NTimelineItem v-for="log in bootLogs" :key="log" type="success" :content="log" />
+        <NTimelineItem v-for="log in timelineLogs" :key="log" type="success" :content="log" />
       </NTimeline>
     </NCard>
   </div>

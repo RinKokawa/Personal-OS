@@ -3,5 +3,8 @@ export const ipcChannels = {
     getAppInfo: 'system:get-app-info',
     getDataDirectoryStatus: 'system:get-data-directory-status',
     openDataDirectory: 'system:open-data-directory'
+  },
+  activity: {
+    list: 'activity:list'
   }
 } as const

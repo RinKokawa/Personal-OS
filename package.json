@@ -23,6 +23,8 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-orm": "^0.45.4",
     "naive-ui": "^2.45.3",
     "pinia": "^4.0.3",
     "vue-router": "^5.4.0"
@@ -31,9 +33,11 @@
     "@electron-toolkit/eslint-config-prettier": "3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^22.19.1",
     "@unocss/reset": "^66.10.5",
     "@vitejs/plugin-vue": "^6.0.2",
+    "drizzle-kit": "^0.31.11",
     "electron": "^39.2.6",
     "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",

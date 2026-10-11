@@ -3,6 +3,8 @@ import { fail, ok, type ApiResult } from '../../shared/api-result'
 import { ipcChannels } from '../../shared/ipc'
 import type { AppInfo, DataDirectoryStatus } from '../../shared/models/system'
 import { getAppInfo } from '../services/app-info-service'
+import { runMigrations } from '../db/migrate'
+import { createActivityLog } from '../services/activity-service'
 import {
   getDataDirectoryStatus,
   initializeDataDirectory,
@@ -45,4 +47,13 @@ export function registerSystemIpc(): void {
 
 export async function initializeSystemCore(): Promise<void> {
   await initializeDataDirectory()
+  runMigrations()
+  createActivityLog({
+    type: 'system',
+    action: 'initialized',
+    title: '系统核心已初始化',
+    detail: 'SYSTEM CORE / DATA DIRECTORY / SQLITE READY',
+    source: 'system',
+    riskLevel: 'low'
+  })
 }
