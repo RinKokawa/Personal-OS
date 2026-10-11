@@ -5,6 +5,15 @@ export interface AppInfo {
   platform: string
 }
 
+export interface DesktopSettings {
+  openAtLogin: boolean
+  openAtLoginAvailable: boolean
+  closeToTray: boolean
+  globalShortcutAccelerator: string
+  globalShortcutEnabled: boolean
+  globalShortcutRegistered: boolean
+}
+
 export interface DataDirectoryStatus {
   path: string
   exists: boolean

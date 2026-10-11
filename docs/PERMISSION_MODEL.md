@@ -233,23 +233,23 @@ danger    危险
 
 ## 6. 操作矩阵
 
-| 操作 | 权限 | 风险 | V0.1 行为 |
-| --- | --- | --- | --- |
-| 读取应用信息 | `system.info.read` | low | 允许 |
-| 读取数据目录状态 | `system.dataDirectory.read` | low | 允许 |
-| 打开数据目录 | `system.dataDirectory.open` | medium | 用户点击触发 |
-| 创建任务 | `quest.write` | medium | 用户点击触发 |
-| 完成任务 | `quest.write` | medium | 用户点击触发 |
-| 删除任务 | `quest.delete` | high | 确认后执行 |
-| 创建日志 | `journal.write` | medium | 用户点击触发 |
-| 删除日志 | `journal.delete` | high | 确认后执行 |
-| 写入活动日志 | `activity.write` | low | 系统内部允许 |
-| 导出备份 | `system.backup.create` | high | 确认后执行 |
-| 恢复备份 | `system.backup.restore` | danger | V0.1 暂不实现 |
-| 重置全部数据 | `system.reset` | danger | V0.1 暂不实现或强确认 |
-| 网络请求 | `network.request` | high | 默认禁用 |
-| Shell 命令 | `shell.execute` | danger | 默认禁用 |
-| Agent 执行工具 | `agent.executeTool` | high | V0.1 不实现 |
+| 操作             | 权限                        | 风险   | V0.1 行为             |
+| ---------------- | --------------------------- | ------ | --------------------- |
+| 读取应用信息     | `system.info.read`          | low    | 允许                  |
+| 读取数据目录状态 | `system.dataDirectory.read` | low    | 允许                  |
+| 打开数据目录     | `system.dataDirectory.open` | medium | 用户点击触发          |
+| 创建任务         | `quest.write`               | medium | 用户点击触发          |
+| 完成任务         | `quest.write`               | medium | 用户点击触发          |
+| 删除任务         | `quest.delete`              | high   | 确认后执行            |
+| 创建日志         | `journal.write`             | medium | 用户点击触发          |
+| 删除日志         | `journal.delete`            | high   | 确认后执行            |
+| 写入活动日志     | `activity.write`            | low    | 系统内部允许          |
+| 导出备份         | `system.backup.create`      | high   | 确认后执行            |
+| 恢复备份         | `system.backup.restore`     | danger | V0.1 暂不实现         |
+| 重置全部数据     | `system.reset`              | danger | V0.1 暂不实现或强确认 |
+| 网络请求         | `network.request`           | high   | 默认禁用              |
+| Shell 命令       | `shell.execute`             | danger | 默认禁用              |
+| Agent 执行工具   | `agent.executeTool`         | high   | V0.1 不实现           |
 
 ## 7. Renderer 权限边界
 
@@ -449,13 +449,13 @@ SYSTEM 页面必须显示：
 
 V0.1 必须实现：
 
-- [ ] Renderer 只能通过 `window.api` 访问系统能力。
-- [ ] Main 限制文件操作在数据目录内。
-- [ ] 删除任务前确认。
-- [ ] 删除日志前确认。
-- [ ] 导出备份前确认。
-- [ ] 所有任务、日志、备份操作写入活动日志。
-- [ ] AGENT 页面显示 `NOT GRANTED` / `PLANNED` 状态。
+- [x] Renderer 只能通过 `window.api` 访问系统能力。
+- [x] Main 限制文件操作在数据目录内。
+- [x] 删除任务前确认。
+- [ ] 删除日志前确认（V0.1 尚未开放日志删除能力）。
+- [x] 导出备份前确认。
+- [x] 所有任务、日志、备份操作写入活动日志。
+- [x] AGENT 页面显示 `NOT GRANTED` / `PLANNED` 状态。
 
 V0.1 暂不实现：
 
@@ -488,10 +488,10 @@ V0.1 暂不实现：
 
 ## 16. 权限模型验收标准
 
-- [ ] 文档明确区分 low / medium / high / danger。
-- [ ] 文档明确哪些操作必须审批。
-- [ ] Renderer 不直接拥有系统权限。
-- [ ] 文件操作限制在数据目录内。
-- [ ] Agent 默认无文件、网络、命令权限。
-- [ ] 高风险操作有确认流程设计。
-- [ ] 数据模型预留审批与授权记录。
+- [x] 文档明确区分 low / medium / high / danger。
+- [x] 文档明确哪些操作必须审批。
+- [x] Renderer 不直接拥有系统权限。
+- [x] 文件操作限制在数据目录内。
+- [x] Agent 默认无文件、网络、命令权限。
+- [x] 高风险操作有确认流程设计。
+- [x] 数据模型预留审批与授权记录。

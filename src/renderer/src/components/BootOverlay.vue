@@ -17,13 +17,6 @@ const phases = [
   [100, 'CORE ONLINE', '系统已就绪。等待宿主进入。']
 ] as const
 
-function finish(): void {
-  percent.value = 100
-  phase.value = 'CORE ONLINE'
-  log.value = '系统已就绪。等待宿主进入。'
-  ready.value = true
-}
-
 onMounted(() => {
   phases.forEach(([nextPercent, nextPhase, nextLog], index) => {
     window.setTimeout(
@@ -31,9 +24,13 @@ onMounted(() => {
         percent.value = nextPercent
         phase.value = nextPhase
         log.value = nextLog
-        if (nextPercent === 100) ready.value = true
+        if (nextPercent === 100) {
+          window.setTimeout(() => {
+            ready.value = true
+          }, 520)
+        }
       },
-      380 + index * 460
+      520 + index * 650
     )
   })
 })
@@ -95,27 +92,23 @@ onMounted(() => {
         </div>
         <div class="h-[2px] overflow-hidden bg-slate-700">
           <div
-            class="h-full bg-cyan-200 shadow-[0_0_16px_rgba(121,239,218,0.9)] transition-all duration-300"
+            class="h-full bg-cyan-200 shadow-[0_0_16px_rgba(121,239,218,0.9)] transition-all duration-500"
             :style="{ width: `${percent}%` }"
           ></div>
         </div>
         <div class="mt-4 text-left font-mono text-xs text-slate-400">&gt; {{ log }}</div>
       </div>
 
-      <div class="mt-8 flex gap-3">
-        <button
-          class="border border-cyan-200/25 bg-transparent px-5 py-2.5 font-mono text-xs tracking-[0.18em] text-cyan-100 transition hover:border-cyan-200 hover:bg-cyan-200/10"
-          @click="finish"
-        >
-          SKIP
-        </button>
-        <button
-          class="border border-cyan-200 bg-cyan-200 px-8 py-2.5 font-mono text-xs font-bold tracking-[0.18em] text-[#071211] shadow-[0_0_28px_rgba(121,239,218,0.2)] transition hover:brightness-110 disabled:border-cyan-200/35 disabled:bg-cyan-200/20 disabled:text-cyan-50 disabled:shadow-none"
-          :disabled="!ready"
-          @click="emit('enter')"
-        >
-          进入系统 →
-        </button>
+      <div class="mt-8 flex h-[38px] items-center justify-center">
+        <Transition name="boot-enter">
+          <button
+            v-if="ready"
+            class="border border-cyan-200 bg-cyan-200 px-8 py-2.5 font-mono text-xs font-bold tracking-[0.18em] text-[#071211] shadow-[0_0_28px_rgba(121,239,218,0.2)] transition-[filter,box-shadow] hover:brightness-110"
+            @click="emit('enter')"
+          >
+            进入系统 →
+          </button>
+        </Transition>
       </div>
     </div>
 
@@ -127,3 +120,32 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.boot-enter-enter-active {
+  overflow: hidden;
+  transition:
+    clip-path 880ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 180ms ease-out;
+}
+
+.boot-enter-enter-from {
+  clip-path: inset(0 50% 0 50%);
+  opacity: 0;
+}
+
+.boot-enter-enter-to {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-enter-enter-active {
+    transition: opacity 120ms ease-out;
+  }
+
+  .boot-enter-enter-from {
+    clip-path: none;
+  }
+}
+</style>

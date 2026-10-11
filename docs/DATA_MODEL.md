@@ -68,18 +68,18 @@ deleted_at TEXT NULL
 
 V0.1 初始表：
 
-| 表名 | 说明 | 优先级 |
-| --- | --- | --- |
-| `app_settings` | 应用设置 | P0 |
-| `activity_logs` | 活动日志 / 事件历史 | P0 |
-| `quests` | 任务系统 | P0 |
-| `journal_entries` | 日志元数据 | P0 |
-| `resources` | 资源 / 物品栏预留 | P2 |
-| `tags` | 标签 | P1 |
-| `entity_tags` | 实体与标签关联 | P1 |
-| `entity_links` | 实体互相关联 | P1 |
-| `permission_grants` | 权限授权记录预留 | P2 |
-| `approval_records` | 审批记录预留 | P2 |
+| 表名                | 说明                | 优先级 |
+| ------------------- | ------------------- | ------ |
+| `app_settings`      | 应用设置            | P0     |
+| `activity_logs`     | 活动日志 / 事件历史 | P0     |
+| `quests`            | 任务系统            | P0     |
+| `journal_entries`   | 日志元数据          | P0     |
+| `resources`         | 资源 / 物品栏预留   | P2     |
+| `tags`              | 标签                | P1     |
+| `entity_tags`       | 实体与标签关联      | P1     |
+| `entity_links`      | 实体互相关联        | P1     |
+| `permission_grants` | 权限授权记录预留    | P2     |
+| `approval_records`  | 审批记录预留        | P2     |
 
 V0.1 可以先实现 P0 表，但迁移设计应考虑后续表。
 
@@ -100,13 +100,13 @@ CREATE TABLE app_settings (
 
 示例：
 
-| key | value | value_type | 说明 |
-| --- | --- | --- | --- |
-| `ui.accent` | `cyan` | `string` | 强调色 |
-| `ui.motion.enabled` | `true` | `boolean` | 是否启用动效 |
-| `boot.showOnStart` | `true` | `boolean` | 是否显示启动序列 |
-| `data.version` | `1` | `number` | 数据模型版本 |
-| `system.initializedAt` | ISO 时间 | `string` | 首次初始化时间 |
+| key                    | value    | value_type | 说明             |
+| ---------------------- | -------- | ---------- | ---------------- |
+| `ui.accent`            | `cyan`   | `string`   | 强调色           |
+| `ui.motion.enabled`    | `true`   | `boolean`  | 是否启用动效     |
+| `boot.showOnStart`     | `true`   | `boolean`  | 是否显示启动序列 |
+| `data.version`         | `1`      | `number`   | 数据模型版本     |
+| `system.initializedAt` | ISO 时间 | `string`   | 首次初始化时间   |
 
 ## 6. `activity_logs`
 
@@ -134,15 +134,15 @@ CREATE INDEX idx_activity_logs_type ON activity_logs(type);
 
 字段说明：
 
-| 字段 | 说明 |
-| --- | --- |
-| `type` | `system` / `quest` / `journal` / `agent` / `backup` |
-| `action` | `created` / `updated` / `completed` / `deleted` / `exported` 等 |
-| `entity_type` | 关联实体类型，例如 `quest`、`journal_entry` |
-| `entity_id` | 关联实体 ID |
-| `source` | `user` / `system` / `agent` |
-| `risk_level` | `low` / `medium` / `high` / `danger` |
-| `metadata_json` | 扩展信息，JSON 字符串 |
+| 字段            | 说明                                                            |
+| --------------- | --------------------------------------------------------------- |
+| `type`          | `system` / `quest` / `journal` / `agent` / `backup`             |
+| `action`        | `created` / `updated` / `completed` / `deleted` / `exported` 等 |
+| `entity_type`   | 关联实体类型，例如 `quest`、`journal_entry`                     |
+| `entity_id`     | 关联实体 ID                                                     |
+| `source`        | `user` / `system` / `agent`                                     |
+| `risk_level`    | `low` / `medium` / `high` / `danger`                            |
+| `metadata_json` | 扩展信息，JSON 字符串                                           |
 
 示例事件：
 
@@ -270,13 +270,13 @@ CREATE UNIQUE INDEX idx_journal_entries_file_path ON journal_entries(file_path);
 
 字段说明：
 
-| 字段 | 说明 |
-| --- | --- |
-| `entry_date` | 日志所属日期，例如 `2026-10-11` |
-| `file_path` | 相对数据目录的 Markdown 路径 |
-| `excerpt` | 正文摘要，用于列表展示 |
-| `word_count` | 字数统计 |
-| `source` | `user` / `system` / `agent` / `import` |
+| 字段         | 说明                                   |
+| ------------ | -------------------------------------- |
+| `entry_date` | 日志所属日期，例如 `2026-10-11`        |
+| `file_path`  | 相对数据目录的 Markdown 路径           |
+| `excerpt`    | 正文摘要，用于列表展示                 |
+| `word_count` | 字数统计                               |
+| `source`     | `user` / `system` / `agent` / `import` |
 
 Markdown 文件示例：
 
@@ -442,7 +442,7 @@ CREATE TABLE approval_records (
 );
 ```
 
-V0.1 不要求实现，但 Agent 前必须实现。
+V0.1 已建立 `permission_grants` 与 `approval_records` 表及只读状态查询，为后续 Agent 审批流预留；当前不开放 Renderer 创建授权或审批记录。
 
 ## 13. 查询需求
 

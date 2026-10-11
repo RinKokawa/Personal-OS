@@ -22,19 +22,22 @@ const editPriority = ref<QuestPriority>('normal')
 const editType = ref<QuestType>('side')
 const editDueDate = ref<number | null>(null)
 
-const priorityOptions = [
-  { label: 'LOW', value: 'low' },
-  { label: 'NORMAL', value: 'normal' },
-  { label: 'HIGH', value: 'high' },
-  { label: 'URGENT', value: 'urgent' }
-]
+const priorityLabels: Record<QuestPriority, string> = {
+  low: '低',
+  normal: '普通',
+  high: '高',
+  urgent: '紧急'
+}
 
-const typeOptions = [
-  { label: 'MAIN QUEST', value: 'main' },
-  { label: 'SIDE QUEST', value: 'side' },
-  { label: 'DAILY QUEST', value: 'daily' },
-  { label: 'DYNAMIC QUEST', value: 'dynamic' }
-]
+const typeLabels: Record<QuestType, string> = {
+  main: '主线任务',
+  side: '支线任务',
+  daily: '每日任务',
+  dynamic: '动态任务'
+}
+
+const priorityOptions = Object.entries(priorityLabels).map(([value, label]) => ({ value, label }))
+const typeOptions = Object.entries(typeLabels).map(([value, label]) => ({ value, label }))
 
 const filterOptions: Array<{ label: string; value: typeof filter.value }> = [
   { label: '全部任务', value: 'all' },
@@ -233,7 +236,7 @@ function priorityTagType(priorityValue: QuestPriority): 'default' | 'info' | 'wa
 }
 
 function formatDueDate(value?: string | null): string {
-  if (!value) return 'NO DUE DATE'
+  if (!value) return '无截止日期'
   return new Date(value).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
@@ -246,7 +249,7 @@ onMounted(loadQuests)
 
 <template>
   <PageHeader
-    eyebrow="SYSTEM / 02 — QUEST SYSTEM"
+    eyebrow="系统 / 02 — 任务系统"
     title="任务系统"
     description="将遥远的目标拆解为当下能够执行的行动。当前已接入本地 SQLite 持久化。"
   />
@@ -261,7 +264,7 @@ onMounted(loadQuests)
     </div>
     <div class="relative z-1 flex items-center justify-between gap-8">
       <div>
-        <div class="label-line">MAIN QUEST / ACTIVE</div>
+        <div class="label-line">主线任务 / 进行中</div>
         <h2 class="mt-4 text-2xl font-semibold text-white">构建属于自己的个人系统</h2>
         <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-400">
           建立开放的系统底座，让任务、数据、工具和智能协作成为现实。
@@ -269,15 +272,13 @@ onMounted(loadQuests)
       </div>
       <div class="text-right">
         <strong class="font-mono text-5xl text-cyan-200">{{ progress }}%</strong>
-        <div class="mt-2 font-mono text-[10px] tracking-[0.16em] text-slate-500">
-          QUEST PROGRESS
-        </div>
+        <div class="mt-2 font-mono text-[10px] tracking-[0.16em] text-slate-500">任务进度</div>
       </div>
     </div>
   </section>
 
   <section class="mb-4 border border-cyan-200/10 bg-[#101923]/80 p-6">
-    <div class="label-line">NEW QUEST PROTOCOL</div>
+    <div class="label-line">新建任务</div>
     <h3 class="mt-2 text-base font-semibold text-white">发布新任务</h3>
     <div class="mt-5 grid gap-3 lg:grid-cols-[1fr_150px_150px_180px_auto]">
       <NInput v-model:value="title" placeholder="输入任务名称" @keyup.enter="createQuest" />
@@ -298,12 +299,12 @@ onMounted(loadQuests)
   <section class="border border-cyan-200/10 bg-[#101923]/80 p-6">
     <div class="mb-5 flex items-center justify-between">
       <div>
-        <div class="label-line">QUEST DATABASE</div>
+        <div class="label-line">任务库</div>
         <h3 class="mt-2 text-base font-semibold text-white">任务列表 · {{ quests.length }}</h3>
       </div>
       <div class="text-right font-mono text-[10px] tracking-[0.16em] text-cyan-200">
-        <div>{{ quests.length - completedCount }} PENDING</div>
-        <div class="mt-1 text-slate-500">{{ todayCount }} DUE TODAY</div>
+        <div>{{ quests.length - completedCount }} 项待完成</div>
+        <div class="mt-1 text-slate-500">{{ todayCount }} 项今日到期</div>
       </div>
     </div>
 
@@ -327,7 +328,7 @@ onMounted(loadQuests)
       v-if="loading"
       class="rounded border border-dashed border-cyan-200/15 px-6 py-10 text-center text-sm text-slate-500"
     >
-      正在读取 QUEST DATABASE...
+      正在读取任务库...
     </div>
     <div
       v-else-if="filteredQuests.length === 0"
@@ -386,12 +387,12 @@ onMounted(loadQuests)
               {{ quest.description }}
             </p>
             <div class="mt-1 font-mono text-[10px] text-slate-500">
-              {{ quest.type.toUpperCase() }} / DUE {{ formatDueDate(quest.dueAt) }} / CREATED
+              {{ typeLabels[quest.type] }} / 截止 {{ formatDueDate(quest.dueAt) }} / 创建于
               {{ new Date(quest.createdAt).toLocaleString('zh-CN') }}
             </div>
           </div>
           <NTag size="small" :type="priorityTagType(quest.priority)">{{
-            quest.priority.toUpperCase()
+            priorityLabels[quest.priority]
           }}</NTag>
           <NButton size="tiny" quaternary @click="startEditing(quest)">编辑</NButton>
           <NButton size="tiny" quaternary type="error" @click="deleteQuest(quest)">删除</NButton>

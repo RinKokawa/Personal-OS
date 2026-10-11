@@ -10,6 +10,50 @@ export function runMigrations(): void {
       applied_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      value_type TEXT NOT NULL DEFAULT 'string',
+      description TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS permission_grants (
+      id TEXT PRIMARY KEY,
+      subject_type TEXT NOT NULL,
+      subject_id TEXT,
+      permission TEXT NOT NULL,
+      scope_json TEXT,
+      status TEXT NOT NULL,
+      expires_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_permission_grants_subject
+      ON permission_grants(subject_type, subject_id);
+    CREATE INDEX IF NOT EXISTS idx_permission_grants_permission
+      ON permission_grants(permission, status);
+
+    CREATE TABLE IF NOT EXISTS approval_records (
+      id TEXT PRIMARY KEY,
+      request_type TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      risk_level TEXT NOT NULL,
+      status TEXT NOT NULL,
+      subject_type TEXT,
+      subject_id TEXT,
+      payload_json TEXT,
+      decided_at TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_approval_records_status
+      ON approval_records(status, created_at);
+    CREATE INDEX IF NOT EXISTS idx_approval_records_subject
+      ON approval_records(subject_type, subject_id);
+
     CREATE TABLE IF NOT EXISTS activity_logs (
       id TEXT PRIMARY KEY,
       type TEXT NOT NULL,
@@ -79,4 +123,13 @@ export function runMigrations(): void {
   sqlite
     .prepare(`INSERT OR IGNORE INTO migrations (id, name, applied_at) VALUES (?, ?, ?)`)
     .run('0003_journal_entries', 'Create journal entries table', now)
+  sqlite
+    .prepare(`INSERT OR IGNORE INTO migrations (id, name, applied_at) VALUES (?, ?, ?)`)
+    .run('0004_app_settings', 'Create app settings table', now)
+  sqlite
+    .prepare(`INSERT OR IGNORE INTO migrations (id, name, applied_at) VALUES (?, ?, ?)`)
+    .run('0005_permission_grants', 'Create permission grants table', now)
+  sqlite
+    .prepare(`INSERT OR IGNORE INTO migrations (id, name, applied_at) VALUES (?, ?, ?)`)
+    .run('0006_approval_records', 'Create approval records table', now)
 }

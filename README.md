@@ -13,7 +13,7 @@
 </div>
 
 > [!NOTE]
-> **当前状态：PRE-ALPHA。** 仓库已经建立 Electron + Vue 3 + TypeScript 的工程骨架与初步页面；任务持久化、日记数据库、插件 SDK、Agent 执行等核心能力仍处于开发计划中。下文的「系统」为产品设计愿景，不表示全部功能已经实现。
+> **当前状态：PRE-ALPHA / VERSION 0.1 验收阶段。** Electron 桌面基础、SQLite 数据层、QUEST、JOURNAL、STATUS、系统托盘、本地备份与权限边界已经建立；插件 SDK、真实 Agent 执行、备份恢复与自动化仍处于后续计划。下文同时包含已实现能力与长期产品愿景，请以 [WORK PLAN](./docs/WORK_PLAN.md) 为准。
 
 ---
 
@@ -301,7 +301,7 @@ AI Agent 是 Personal OS 的重要组成部分，但并不是系统本身。
 
 ## 09. 系统核心 / ARCHITECTURE
 
-Personal OS 计划作为 Windows 本地桌面应用运行，并提供开机启动、系统托盘和后台任务能力。
+Personal OS 当前作为 Windows 本地桌面应用运行，已提供单实例、窗口状态记忆、系统托盘、关闭到托盘、开机启动设置与受控全局快捷键。
 
 <div align="center">
   <img src="./assets/readme/system-topology.svg" width="100%" alt="Proposed architecture: Electron/Vue interface, core, module SDK, agent bridge and local data" />
@@ -320,7 +320,7 @@ Personal OS 计划作为 Windows 本地桌面应用运行，并提供开机启�
 | State         | Pinia                             |
 | Database      | SQLite + Drizzle ORM              |
 | Documents     | Markdown                          |
-| Agent         | Pi RPC + Node.js                  |
+| Agent         | Pi RPC + Node.js（规划中）        |
 | Background    | Node.js / Electron UtilityProcess |
 | Communication | Electron IPC                      |
 | Distribution  | electron-builder                  |
@@ -335,7 +335,7 @@ Personal OS 计划作为 Windows 本地桌面应用运行，并提供开机启�
 
 宿主的数据首先属于宿主。
 
-Personal OS 的核心数据将默认保存在本地设备中，并计划提供备份、恢复和导出机制。
+Personal OS 的核心数据默认保存在本地设备中，已提供 SQLite 与 Markdown 目录快照备份；恢复和压缩导出仍在规划中。
 
 本地优先不代表所有 AI 推理都必须离线执行。使用云端模型时，相关数据可能被发送给模型服务商。系统应明确区分本地操作与网络请求，并提供对应的授权控制。
 
@@ -354,24 +354,26 @@ npm run dev
 
 工程检查命令：`npm run typecheck`、`npm run lint`、`npm run build`。
 
-> **[ SYSTEM NOTICE ]** 以上命令用于运行当前开发骨架，并不意味着日记、任务、Agent 等规划功能已经完成。详细执行顺序参阅 [WORK PLAN](./docs/WORK_PLAN.md)。
+> **[ SYSTEM NOTICE ]** QUEST 与 JOURNAL 已具备本地最小闭环；真实 Agent、插件、恢复和自动化仍未开放。详细状态参阅 [WORK PLAN](./docs/WORK_PLAN.md)。
 
 ---
 
 ## 10. 系统升级 / ROADMAP
 
-**当前开发状态：PRE-ALPHA — 工程骨架已建立，核心能力开发中。**
+**当前开发状态：PRE-ALPHA — VERSION 0.1 核心能力已建立，正在执行最终验收。**
 
-以下为计划中的能力，不代表已经实现。
+以下复选框区分已实现能力与后续规划；通过实现不等于正式稳定版发布。
 
 ### VERSION 0.1 — 系统觉醒
 
-- [ ] Electron 桌面应用基础
-- [ ] 主界面与系统状态面板
-- [ ] 日记及 Markdown 编辑器
-- [ ] Todo 与基础任务管理
-- [ ] SQLite 本地数据存储
-- [ ] 系统托盘与开机启动
+- [x] Electron 桌面应用基础
+- [x] 主界面与系统状态面板
+- [x] 日记及 Markdown 编辑器
+- [x] Todo 与基础任务管理
+- [x] SQLite 本地数据存储
+- [x] 系统托盘与开机启动
+- [x] 基础本地备份与数据目录状态
+- [x] 权限、审批与审计数据结构预留
 
 ### VERSION 0.2 — 任务展开
 
@@ -466,5 +468,5 @@ npm run dev
 <div align="center">
   <img src="./assets/readme/worldline.svg" width="100%" alt="Fork the core. Write your own worldline." />
 
-  <sub>Personal OS · Your System. Your Rules. Your Story.</sub>
+<sub>Personal OS · Your System. Your Rules. Your Story.</sub>
 </div>

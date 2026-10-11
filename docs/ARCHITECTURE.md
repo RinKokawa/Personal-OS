@@ -65,8 +65,8 @@ Main 是唯一允许访问本地系统能力的层。
 - 处理 IPC 请求。
 - 记录活动日志。
 - 执行备份和导出。
-- 后续管理托盘、开机启动、单实例。
-- 后续管理 Agent 执行、审批、审计。
+- 管理托盘、开机启动、单实例、窗口状态与全局快捷键。
+- 后续管理 Agent 执行；当前已预留权限、审批与审计数据边界。
 
 禁止：
 
@@ -226,28 +226,31 @@ V0.1 必须创建：
 system:get-app-info
 system:get-data-directory-status
 system:open-data-directory
+system:get-desktop-settings
+system:set-open-at-login
+system:set-global-shortcut-enabled
 
 quest:list
 quest:create
 quest:update
 quest:complete
+quest:reopen
 quest:delete
 
 journal:list
 journal:get
 journal:save
-journal:delete
 
 activity:list
-backup:export
+backup:list
+backup:create
+permission:get-overview
 ```
 
 ### 6.2 统一返回结构
 
 ```ts
-export type ApiResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: ApiError }
+export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: ApiError }
 
 export interface ApiError {
   code: string
@@ -306,9 +309,16 @@ UNKNOWN_ERROR          未知错误
 
 ### 7.5 Backup Service
 
-- 导出数据库与 Markdown 文件。
-- 后续支持恢复。
-- 危险操作必须进入权限模型。
+- 使用 SQLite 在线备份生成一致性数据库快照。
+- 复制 Markdown、Notes 与 Attachments 本地目录。
+- 写入备份清单并忽略未完成快照。
+- 后续支持受审批保护的恢复。
+
+### 7.6 Permission Service
+
+- 返回能力风险与授权状态。
+- 查询持久授权、最近审批与待审批数量。
+- V0.1 不向 Renderer 开放授权或审批写入接口。
 
 ## 8. Renderer 模块结构
 
@@ -354,15 +364,17 @@ UNKNOWN_ERROR          未知错误
 ## 9. 启动流程
 
 ```text
-app.whenReady()
-├── 设置 AppUserModelId
-├── 注册单实例锁（M6）
-├── 初始化数据目录
-├── 初始化数据库
-├── 执行迁移
-├── 注册 IPC handlers
-├── 创建主窗口
-└── Renderer 请求启动状态并展示 STATUS
+requestSingleInstanceLock()
+└── app.whenReady()
+    ├── 设置 AppUserModelId
+    ├── 初始化数据目录
+    ├── 初始化数据库
+    ├── 执行迁移
+    ├── 注册 IPC handlers
+    ├── 创建并恢复主窗口
+    ├── 创建系统托盘
+    ├── 恢复受控全局快捷键
+    └── Renderer 请求启动状态并展示 STATUS
 ```
 
 失败处理：
@@ -403,13 +415,13 @@ V0.1 必须满足：
 
 ## 12. V0.1 架构验收标准
 
-- [ ] 应用启动时创建数据目录。
-- [ ] 应用启动时创建或打开 SQLite 数据库。
-- [ ] Renderer 只能通过 `window.api` 访问系统能力。
-- [ ] IPC 返回统一 `ApiResult<T>`。
-- [ ] STATUS 能读取真实统计数据。
-- [ ] QUEST 能持久化任务。
-- [ ] JOURNAL 能保存 Markdown 文件。
-- [ ] 操作会写入 `activity_logs`。
-- [ ] `npm run typecheck` 通过。
-- [ ] `npm run lint` 通过。
+- [x] 应用启动时创建数据目录。
+- [x] 应用启动时创建或打开 SQLite 数据库。
+- [x] Renderer 只能通过 `window.api` 访问系统能力。
+- [x] IPC 返回统一 `ApiResult<T>`。
+- [x] STATUS 能读取真实统计数据。
+- [x] QUEST 能持久化任务。
+- [x] JOURNAL 能保存 Markdown 文件。
+- [x] 操作会写入 `activity_logs`。
+- [x] `npm run typecheck` 通过。
+- [x] `npm run lint` 通过。

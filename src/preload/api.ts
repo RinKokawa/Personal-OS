@@ -6,10 +6,21 @@ export const api: WindowApi = {
   system: {
     getAppInfo: () => ipcRenderer.invoke(ipcChannels.system.getAppInfo),
     getDataDirectoryStatus: () => ipcRenderer.invoke(ipcChannels.system.getDataDirectoryStatus),
-    openDataDirectory: () => ipcRenderer.invoke(ipcChannels.system.openDataDirectory)
+    openDataDirectory: () => ipcRenderer.invoke(ipcChannels.system.openDataDirectory),
+    getDesktopSettings: () => ipcRenderer.invoke(ipcChannels.system.getDesktopSettings),
+    setOpenAtLogin: (enabled) => ipcRenderer.invoke(ipcChannels.system.setOpenAtLogin, enabled),
+    setGlobalShortcutEnabled: (enabled) =>
+      ipcRenderer.invoke(ipcChannels.system.setGlobalShortcutEnabled, enabled)
   },
   activity: {
     list: (input) => ipcRenderer.invoke(ipcChannels.activity.list, input)
+  },
+  backup: {
+    list: () => ipcRenderer.invoke(ipcChannels.backup.list),
+    create: () => ipcRenderer.invoke(ipcChannels.backup.create)
+  },
+  permission: {
+    getOverview: () => ipcRenderer.invoke(ipcChannels.permission.getOverview)
   },
   quest: {
     list: (input) => ipcRenderer.invoke(ipcChannels.quest.list, input),

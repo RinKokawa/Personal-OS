@@ -1,5 +1,39 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
+export const appSettings = sqliteTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  valueType: text('value_type').notNull().default('string'),
+  description: text('description'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull()
+})
+
+export const permissionGrants = sqliteTable('permission_grants', {
+  id: text('id').primaryKey(),
+  subjectType: text('subject_type').notNull(),
+  subjectId: text('subject_id'),
+  permission: text('permission').notNull(),
+  scopeJson: text('scope_json'),
+  status: text('status').notNull(),
+  expiresAt: text('expires_at'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull()
+})
+
+export const approvalRecords = sqliteTable('approval_records', {
+  id: text('id').primaryKey(),
+  requestType: text('request_type').notNull(),
+  summary: text('summary').notNull(),
+  riskLevel: text('risk_level').notNull(),
+  status: text('status').notNull(),
+  subjectType: text('subject_type'),
+  subjectId: text('subject_id'),
+  payloadJson: text('payload_json'),
+  decidedAt: text('decided_at'),
+  createdAt: text('created_at').notNull()
+})
+
 export const activityLogs = sqliteTable('activity_logs', {
   id: text('id').primaryKey(),
   type: text('type').notNull(),

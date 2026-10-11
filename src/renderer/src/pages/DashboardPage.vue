@@ -6,11 +6,14 @@ import PageHeader from '@renderer/components/PageHeader.vue'
 import type { ActivityLog } from '../../../shared/models/activity'
 import type { JournalEntry } from '../../../shared/models/journal'
 import type { Quest } from '../../../shared/models/quest'
+import type { AppInfo, DataDirectoryStatus } from '../../../shared/models/system'
 
 const router = useRouter()
 const activityLogs = ref<ActivityLog[]>([])
 const quests = ref<Quest[]>([])
 const journalEntries = ref<JournalEntry[]>([])
+const appInfo = ref<AppInfo | null>(null)
+const dataDirectory = ref<DataDirectoryStatus | null>(null)
 
 const fallbackLogs = [
   '正在识别宿主……',
@@ -44,6 +47,12 @@ const completedQuests = computed(() => quests.value.filter((quest) => quest.stat
 const todayQuests = computed(() => openQuests.value.filter((quest) => isToday(quest.dueAt)))
 const completedTodayQuests = computed(() =>
   quests.value.filter((quest) => quest.status === 'done' && isToday(quest.dueAt))
+)
+const todayJournalEntries = computed(() =>
+  journalEntries.value.filter((entry) => isToday(entry.entryDate))
+)
+const todayJournalWords = computed(() =>
+  todayJournalEntries.value.reduce((total, entry) => total + entry.wordCount, 0)
 )
 const priorityQuests = computed(() => {
   const weight = { urgent: 4, high: 3, normal: 2, low: 1 }
@@ -97,9 +106,9 @@ const metrics = computed(() => [
 ])
 
 const quickAbilities = [
-  ['AI ASSISTANT', 'DEMO MODE', '/agent-hub'],
-  ['QUICK NOTE', 'READY', '/journal'],
-  ['DATA EXPORT', 'LOCAL ONLY', '/settings']
+  ['NEW QUEST', 'CREATE / LOCAL', '/todo'],
+  ['NEW JOURNAL', 'WRITE / MARKDOWN', '/journal'],
+  ['AI ASSISTANT', 'PLANNED / NOT AUTHORIZED', '/agent-hub']
 ]
 
 function priorityLabel(priority: Quest['priority']): string {
@@ -107,11 +116,14 @@ function priorityLabel(priority: Quest['priority']): string {
 }
 
 async function loadDashboard(): Promise<void> {
-  const [activityResult, questResult, journalResult] = await Promise.all([
-    window.api.activity.list({ limit: 5 }),
-    window.api.quest.list({ status: 'all' }),
-    window.api.journal.list({ limit: 100 })
-  ])
+  const [activityResult, questResult, journalResult, appInfoResult, dataDirectoryResult] =
+    await Promise.all([
+      window.api.activity.list({ limit: 5 }),
+      window.api.quest.list({ status: 'all' }),
+      window.api.journal.list({ limit: 100 }),
+      window.api.system.getAppInfo(),
+      window.api.system.getDataDirectoryStatus()
+    ])
 
   if (activityResult.ok) {
     activityLogs.value = activityResult.data
@@ -124,6 +136,18 @@ async function loadDashboard(): Promise<void> {
   if (journalResult.ok) {
     journalEntries.value = journalResult.data
   }
+
+  if (appInfoResult.ok) {
+    appInfo.value = appInfoResult.data
+  }
+
+  if (dataDirectoryResult.ok) {
+    dataDirectory.value = dataDirectoryResult.data
+  }
+}
+
+async function openDataDirectory(): Promise<void> {
+  await window.api.system.openDataDirectory()
 }
 
 onMounted(loadDashboard)
@@ -290,12 +314,36 @@ onMounted(loadDashboard)
             ><span class="font-mono text-cyan-200">{{ todayQuests.length }} ACTIVE</span>
           </div>
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">
-            <span class="text-slate-400">运行时状态</span
-            ><span class="font-mono text-cyan-200">ACTIVE</span>
+            <span class="text-slate-400">今日日志</span>
+            <span class="font-mono text-cyan-200">
+              {{ todayJournalEntries.length }} ENTRIES / {{ todayJournalWords }} WORDS
+            </span>
           </div>
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">
-            <span class="text-slate-400">当前版本</span
-            ><span class="font-mono text-slate-400">PRE-ALPHA</span>
+            <span class="text-slate-400">数据目录</span>
+            <button
+              class="max-w-55 truncate text-right font-mono text-cyan-200 hover:text-white"
+              :title="dataDirectory?.path"
+              @click="openDataDirectory"
+            >
+              {{ dataDirectory?.initialized ? 'READY / OPEN' : 'UNAVAILABLE' }}
+            </button>
+          </div>
+          <div class="flex justify-between border-t border-cyan-200/10 pt-3">
+            <span class="text-slate-400">Agent 权限</span>
+            <span class="font-mono text-amber-300">NOT AUTHORIZED</span>
+          </div>
+          <div class="flex justify-between border-t border-cyan-200/10 pt-3">
+            <span class="text-slate-400">运行时状态</span>
+            <span class="font-mono text-cyan-200">
+              {{ dataDirectory?.initialized ? 'CORE ONLINE' : 'DEGRADED' }}
+            </span>
+          </div>
+          <div class="flex justify-between border-t border-cyan-200/10 pt-3">
+            <span class="text-slate-400">当前版本</span>
+            <span class="font-mono text-slate-400">
+              {{ appInfo ? `${appInfo.version} / ${appInfo.mode.toUpperCase()}` : 'PRE-ALPHA' }}
+            </span>
           </div>
         </div>
       </section>
