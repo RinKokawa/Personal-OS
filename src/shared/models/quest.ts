@@ -25,6 +25,8 @@ export interface Quest {
 export interface ListQuestsInput {
   status?: QuestStatus | 'all' | 'open'
   limit?: number
+  offset?: number
+  dueToday?: boolean
 }
 
 export interface CreateQuestInput {
@@ -43,4 +45,12 @@ export interface UpdateQuestInput {
   status?: QuestStatus
   priority?: QuestPriority
   dueAt?: string | null
+}
+
+export interface QuestStats {
+  total: number
+  completed: number
+  open: number
+  todayOpen: number
+  todayCompleted: number
 }

@@ -4,14 +4,21 @@ import { useRouter } from 'vue-router'
 import { NButton, NProgress } from 'naive-ui'
 import PageHeader from '@renderer/components/PageHeader.vue'
 import type { ActivityLog } from '../../../shared/models/activity'
-import type { JournalEntry } from '../../../shared/models/journal'
-import type { Quest } from '../../../shared/models/quest'
+import type { JournalStats } from '../../../shared/models/journal'
+import type { Quest, QuestStats } from '../../../shared/models/quest'
 import type { AppInfo, DataDirectoryStatus } from '../../../shared/models/system'
 
 const router = useRouter()
 const activityLogs = ref<ActivityLog[]>([])
 const quests = ref<Quest[]>([])
-const journalEntries = ref<JournalEntry[]>([])
+const questStats = ref<QuestStats>({
+  total: 0,
+  completed: 0,
+  open: 0,
+  todayOpen: 0,
+  todayCompleted: 0
+})
+const journalStats = ref<JournalStats>({ total: 0, todayEntries: 0, todayWords: 0 })
 const appInfo = ref<AppInfo | null>(null)
 const dataDirectory = ref<DataDirectoryStatus | null>(null)
 
@@ -23,17 +30,6 @@ const fallbackLogs = [
   '系统初始化完成。欢迎回来，宿主。'
 ]
 
-function isToday(value?: string | null): boolean {
-  if (!value) return false
-  const date = new Date(value)
-  const today = new Date()
-  return (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  )
-}
-
 function formatDueDate(value?: string | null): string {
   if (!value) return 'NO DUE DATE'
   return new Date(value).toLocaleDateString('zh-CN', {
@@ -42,36 +38,12 @@ function formatDueDate(value?: string | null): string {
   })
 }
 
-const openQuests = computed(() => quests.value.filter((quest) => quest.status !== 'done'))
-const completedQuests = computed(() => quests.value.filter((quest) => quest.status === 'done'))
-const todayQuests = computed(() => openQuests.value.filter((quest) => isToday(quest.dueAt)))
-const completedTodayQuests = computed(() =>
-  quests.value.filter((quest) => quest.status === 'done' && isToday(quest.dueAt))
+const priorityQuests = computed(() => quests.value)
+const questProgress = computed(() =>
+  questStats.value.total
+    ? Math.round((questStats.value.completed / questStats.value.total) * 100)
+    : 0
 )
-const todayJournalEntries = computed(() =>
-  journalEntries.value.filter((entry) => isToday(entry.entryDate))
-)
-const todayJournalWords = computed(() =>
-  todayJournalEntries.value.reduce((total, entry) => total + entry.wordCount, 0)
-)
-const priorityQuests = computed(() => {
-  const weight = { urgent: 4, high: 3, normal: 2, low: 1 }
-  return [...openQuests.value]
-    .sort((a, b) => {
-      const leftDue = a.dueAt ? new Date(a.dueAt).getTime() : Number.POSITIVE_INFINITY
-      const rightDue = b.dueAt ? new Date(b.dueAt).getTime() : Number.POSITIVE_INFINITY
-      return (
-        leftDue - rightDue ||
-        weight[b.priority] - weight[a.priority] ||
-        b.createdAt.localeCompare(a.createdAt)
-      )
-    })
-    .slice(0, 5)
-})
-const questProgress = computed(() => {
-  if (quests.value.length === 0) return 0
-  return Math.round((completedQuests.value.length / quests.value.length) * 100)
-})
 
 const timelineLogs = computed(() => {
   if (activityLogs.value.length === 0) {
@@ -87,20 +59,20 @@ const timelineLogs = computed(() => {
 const metrics = computed(() => [
   {
     label: 'QUESTS COMPLETE',
-    value: `${String(completedQuests.value.length).padStart(2, '0')} / ${String(quests.value.length).padStart(2, '0')}`,
-    foot: openQuests.value.length ? `${openQuests.value.length} 项任务待完成` : '任务队列已清空'
+    value: `${String(questStats.value.completed).padStart(2, '0')} / ${String(questStats.value.total).padStart(2, '0')}`,
+    foot: questStats.value.open ? `${questStats.value.open} 项任务待完成` : '任务队列已清空'
   },
   {
     label: 'TODAY QUESTS',
-    value: String(todayQuests.value.length).padStart(2, '0'),
-    foot: completedTodayQuests.value.length
-      ? `${completedTodayQuests.value.length} 项今日任务已完成`
+    value: String(questStats.value.todayOpen).padStart(2, '0'),
+    foot: questStats.value.todayCompleted
+      ? `${questStats.value.todayCompleted} 项今日任务已完成`
       : '今日任务信号待处理'
   },
   {
     label: 'JOURNAL ENTRIES',
-    value: String(journalEntries.value.length).padStart(2, '0'),
-    foot: journalEntries.value.length ? 'Markdown 记忆存档在线' : '等待第一条系统日志'
+    value: String(journalStats.value.total).padStart(2, '0'),
+    foot: journalStats.value.total ? 'Markdown 记忆存档在线' : '等待第一条系统日志'
   },
   { label: 'AGENT PROCESSES', value: '00', foot: '待授权 / 安全待机' }
 ])
@@ -116,26 +88,32 @@ function priorityLabel(priority: Quest['priority']): string {
 }
 
 async function loadDashboard(): Promise<void> {
-  const [activityResult, questResult, journalResult, appInfoResult, dataDirectoryResult] =
-    await Promise.all([
-      window.api.activity.list({ limit: 5 }),
-      window.api.quest.list({ status: 'all' }),
-      window.api.journal.list({ limit: 100 }),
-      window.api.system.getAppInfo(),
-      window.api.system.getDataDirectoryStatus()
-    ])
+  const [
+    activityResult,
+    questResult,
+    questStatsResult,
+    journalStatsResult,
+    appInfoResult,
+    dataDirectoryResult
+  ] = await Promise.all([
+    window.api.activity.list({ limit: 5 }),
+    window.api.quest.list({ status: 'open', limit: 5 }),
+    window.api.quest.stats(),
+    window.api.journal.stats(),
+    window.api.system.getAppInfo(),
+    window.api.system.getDataDirectoryStatus()
+  ])
 
   if (activityResult.ok) {
     activityLogs.value = activityResult.data
   }
 
   if (questResult.ok) {
-    quests.value = questResult.data
+    quests.value = questResult.data.items
   }
 
-  if (journalResult.ok) {
-    journalEntries.value = journalResult.data
-  }
+  if (questStatsResult.ok) questStats.value = questStatsResult.data
+  if (journalStatsResult.ok) journalStats.value = journalStatsResult.data
 
   if (appInfoResult.ok) {
     appInfo.value = appInfoResult.data
@@ -311,12 +289,12 @@ onMounted(loadDashboard)
           </div>
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">
             <span class="text-slate-400">今日任务</span
-            ><span class="font-mono text-cyan-200">{{ todayQuests.length }} ACTIVE</span>
+            ><span class="font-mono text-cyan-200">{{ questStats.todayOpen }} ACTIVE</span>
           </div>
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">
             <span class="text-slate-400">今日日志</span>
             <span class="font-mono text-cyan-200">
-              {{ todayJournalEntries.length }} ENTRIES / {{ todayJournalWords }} WORDS
+              {{ journalStats.todayEntries }} ENTRIES / {{ journalStats.todayWords }} WORDS
             </span>
           </div>
           <div class="flex justify-between border-t border-cyan-200/10 pt-3">

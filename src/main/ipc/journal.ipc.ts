@@ -1,22 +1,37 @@
+import type { Page } from '../../shared/models/page'
 import { ipcMain } from 'electron'
 import { fail, ok, type ApiResult } from '../../shared/api-result'
 import { ipcChannels } from '../../shared/ipc'
 import type {
   JournalEntry,
+  JournalStats,
   JournalEntryWithContent,
   ListJournalEntriesInput,
   SaveJournalEntryInput
 } from '../../shared/models/journal'
-import { getJournalEntry, listJournalEntries, saveJournalEntry } from '../services/journal-service'
+import {
+  getJournalEntry,
+  getJournalStats,
+  listJournalEntries,
+  saveJournalEntry
+} from '../services/journal-service'
 
 function toErrorResult<T>(code: string, message: string, error: unknown): ApiResult<T> {
   return fail(code, message, error instanceof Error ? error.message : error)
 }
 
 export function registerJournalIpc(): void {
+  ipcMain.handle(ipcChannels.journal.stats, (): ApiResult<JournalStats> => {
+    try {
+      return ok(getJournalStats())
+    } catch (error) {
+      return toErrorResult('JOURNAL_STATS_ERROR', '读取统计失败', error)
+    }
+  })
+
   ipcMain.handle(
     ipcChannels.journal.list,
-    (_event, input?: ListJournalEntriesInput): ApiResult<JournalEntry[]> => {
+    (_event, input?: ListJournalEntriesInput): ApiResult<Page<JournalEntry>> => {
       try {
         return ok(listJournalEntries(input))
       } catch (error) {

@@ -23,6 +23,7 @@ export const api: WindowApi = {
     getOverview: () => ipcRenderer.invoke(ipcChannels.permission.getOverview)
   },
   quest: {
+    stats: () => ipcRenderer.invoke(ipcChannels.quest.stats),
     list: (input) => ipcRenderer.invoke(ipcChannels.quest.list, input),
     create: (input) => ipcRenderer.invoke(ipcChannels.quest.create, input),
     update: (input) => ipcRenderer.invoke(ipcChannels.quest.update, input),
@@ -31,6 +32,7 @@ export const api: WindowApi = {
     delete: (id) => ipcRenderer.invoke(ipcChannels.quest.delete, id)
   },
   journal: {
+    stats: () => ipcRenderer.invoke(ipcChannels.journal.stats),
     list: (input) => ipcRenderer.invoke(ipcChannels.journal.list, input),
     get: (id) => ipcRenderer.invoke(ipcChannels.journal.get, id),
     save: (input) => ipcRenderer.invoke(ipcChannels.journal.save, input)

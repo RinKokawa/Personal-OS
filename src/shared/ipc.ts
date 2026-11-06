@@ -18,6 +18,7 @@ export const ipcChannels = {
     getOverview: 'permission:get-overview'
   },
   quest: {
+    stats: 'quest:stats',
     list: 'quest:list',
     create: 'quest:create',
     update: 'quest:update',
@@ -26,6 +27,7 @@ export const ipcChannels = {
     delete: 'quest:delete'
   },
   journal: {
+    stats: 'journal:stats',
     list: 'journal:list',
     get: 'journal:get',
     save: 'journal:save'
