@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { NButton, NDatePicker, NInput, NSelect, NTag, useMessage } from 'naive-ui'
 import PageHeader from '@renderer/components/PageHeader.vue'
-import type { Quest, QuestPriority, QuestType } from '../../../shared/models/quest'
+import type { Quest, QuestPriority, QuestStats, QuestType } from '../../../shared/models/quest'
 
 const message = useMessage()
 const quests = ref<Quest[]>([])
 const loading = ref(false)
+const hasMore = ref(false)
+const matchingTotal = ref(0)
+const stats = ref<QuestStats>({ total: 0, completed: 0, open: 0, todayOpen: 0, todayCompleted: 0 })
+let loadVersion = 0
 const creating = ref(false)
 const savingQuestId = ref<string | null>(null)
 const filter = ref<'all' | 'open' | 'done' | 'today'>('all')
@@ -46,13 +50,6 @@ const filterOptions: Array<{ label: string; value: typeof filter.value }> = [
   { label: '已完成', value: 'done' }
 ]
 
-const priorityWeight: Record<QuestPriority, number> = {
-  urgent: 4,
-  high: 3,
-  normal: 2,
-  low: 1
-}
-
 function dateToIso(value: number | null): string | null {
   return value === null ? null : new Date(value).toISOString()
 }
@@ -61,66 +58,45 @@ function isoToDateValue(value?: string | null): number | null {
   return value ? new Date(value).getTime() : null
 }
 
-function isToday(value?: string | null): boolean {
-  if (!value) return false
-  const date = new Date(value)
-  const today = new Date()
-  return (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  )
-}
-
-function compareQuests(left: Quest, right: Quest): number {
-  if (left.status === 'done' && right.status !== 'done') return 1
-  if (left.status !== 'done' && right.status === 'done') return -1
-
-  const leftDue = left.dueAt ? new Date(left.dueAt).getTime() : Number.POSITIVE_INFINITY
-  const rightDue = right.dueAt ? new Date(right.dueAt).getTime() : Number.POSITIVE_INFINITY
-  if (leftDue !== rightDue) return leftDue - rightDue
-
-  const priorityDiff = priorityWeight[right.priority] - priorityWeight[left.priority]
-  if (priorityDiff !== 0) return priorityDiff
-
-  return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
-}
-
-const sortedQuests = computed(() => [...quests.value].sort(compareQuests))
-
-const filteredQuests = computed(() => {
-  if (filter.value === 'open') return sortedQuests.value.filter((quest) => quest.status !== 'done')
-  if (filter.value === 'done') return sortedQuests.value.filter((quest) => quest.status === 'done')
-  if (filter.value === 'today') {
-    return sortedQuests.value.filter((quest) => quest.status !== 'done' && isToday(quest.dueAt))
-  }
-  return sortedQuests.value
-})
-
-const completedCount = computed(
-  () => quests.value.filter((quest) => quest.status === 'done').length
+const progress = computed(() =>
+  stats.value.total ? Math.round((stats.value.completed / stats.value.total) * 100) : 0
 )
-const todayCount = computed(
-  () => quests.value.filter((quest) => quest.status !== 'done' && isToday(quest.dueAt)).length
-)
-const progress = computed(() => {
-  if (quests.value.length === 0) return 0
-  return Math.round((completedCount.value / quests.value.length) * 100)
-})
 
-async function loadQuests(): Promise<void> {
+async function loadQuests(append = false): Promise<void> {
+  const version = ++loadVersion
   loading.value = true
+  if (!append) {
+    quests.value = []
+    hasMore.value = false
+    matchingTotal.value = 0
+    cancelEditing()
+  }
   try {
-    const result = await window.api.quest.list({ status: 'all' })
+    const [result, statsResult] = await Promise.all([
+      window.api.quest.list({
+        status: filter.value === 'today' ? 'open' : filter.value,
+        dueToday: filter.value === 'today',
+        limit: 50,
+        offset: append ? quests.value.length : 0
+      }),
+      window.api.quest.stats()
+    ])
+    if (version !== loadVersion) return
     if (result.ok) {
-      quests.value = result.data
+      quests.value = append ? [...quests.value, ...result.data.items] : result.data.items
+      hasMore.value = result.data.hasMore
+      matchingTotal.value = result.data.total
     } else {
       message.error(result.error.message)
     }
+    if (statsResult.ok) stats.value = statsResult.data
+    else message.error(statsResult.error.message)
   } finally {
-    loading.value = false
+    if (version === loadVersion) loading.value = false
   }
 }
+
+watch(filter, () => void loadQuests())
 
 async function createQuest(): Promise<void> {
   const nextTitle = title.value.trim()
@@ -300,11 +276,11 @@ onMounted(loadQuests)
     <div class="mb-5 flex items-center justify-between">
       <div>
         <div class="label-line">任务库</div>
-        <h3 class="mt-2 text-base font-semibold text-white">任务列表 · {{ quests.length }}</h3>
+        <h3 class="mt-2 text-base font-semibold text-white">任务列表 · {{ matchingTotal }}</h3>
       </div>
       <div class="text-right font-mono text-[10px] tracking-[0.16em] text-cyan-200">
-        <div>{{ quests.length - completedCount }} 项待完成</div>
-        <div class="mt-1 text-slate-500">{{ todayCount }} 项今日到期</div>
+        <div>{{ stats.open }} 项待完成</div>
+        <div class="mt-1 text-slate-500">{{ stats.todayOpen }} 项今日到期</div>
       </div>
     </div>
 
@@ -325,19 +301,19 @@ onMounted(loadQuests)
     </div>
 
     <div
-      v-if="loading"
+      v-if="loading && quests.length === 0"
       class="rounded border border-dashed border-cyan-200/15 px-6 py-10 text-center text-sm text-slate-500"
     >
       正在读取任务库...
     </div>
     <div
-      v-else-if="filteredQuests.length === 0"
+      v-else-if="quests.length === 0"
       class="rounded border border-dashed border-cyan-200/15 px-6 py-10 text-center text-sm text-slate-500"
     >
       当前筛选条件下没有任务。
     </div>
     <div v-else class="divide-y divide-cyan-200/10">
-      <div v-for="quest in filteredQuests" :key="quest.id" class="py-4">
+      <div v-for="quest in quests" :key="quest.id" class="py-4">
         <div v-if="editingQuestId === quest.id" class="grid gap-3">
           <div class="grid gap-3 lg:grid-cols-[1fr_150px_150px_180px]">
             <NInput v-model:value="editTitle" placeholder="任务名称" />
@@ -398,6 +374,12 @@ onMounted(loadQuests)
           <NButton size="tiny" quaternary type="error" @click="deleteQuest(quest)">删除</NButton>
         </div>
       </div>
+    </div>
+    <div v-if="quests.length" class="mt-5 flex items-center justify-between text-xs text-slate-400">
+      <span>已加载 {{ quests.length }} / {{ matchingTotal }} 项</span>
+      <NButton v-if="hasMore" secondary :loading="loading" @click="loadQuests(true)"
+        >加载更多</NButton
+      >
     </div>
   </section>
 </template>

@@ -1,13 +1,26 @@
-import { and, desc, eq, isNull, like, or } from 'drizzle-orm'
+import { and, count, desc, eq, isNull, like, or, sql } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
-import { mkdir, readFile, writeFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
+import {
+  constants,
+  copyFileSync,
+  linkSync,
+  mkdirSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync
+} from 'fs'
 import { dirname, join } from 'path'
 import { getDb } from '../db/client'
 import { journalEntries } from '../db/schema'
 import { getDataDirectoryPath } from './data-directory-service'
 import { createActivityLog } from './activity-service'
+import { localDate } from '../../shared/local-date'
+import type { Page } from '../../shared/models/page'
+import { pagination } from './pagination'
 import type {
   JournalEntry,
+  JournalStats,
   JournalEntryWithContent,
   JournalSource,
   ListJournalEntriesInput,
@@ -29,8 +42,15 @@ function toJournalEntry(row: typeof journalEntries.$inferSelect): JournalEntry {
   }
 }
 
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
+function assertEntryDate(value: string): string {
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
+    Number.isNaN(Date.parse(`${value}T12:00:00Z`)) ||
+    new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) !== value
+  ) {
+    throw new Error('日志日期无效')
+  }
+  return value
 }
 
 function sanitizeTitle(title: string): string {
@@ -38,9 +58,9 @@ function sanitizeTitle(title: string): string {
   return value.slice(0, 90)
 }
 
-function relativeJournalPath(entryDate: string): string {
+function relativeJournalPath(entryDate: string, id: string): string {
   const year = entryDate.slice(0, 4)
-  return join('journal', year, `${entryDate}.md`).replaceAll('\\', '/')
+  return join('journal', year, `${entryDate}-${id}.md`).replaceAll('\\', '/')
 }
 
 function absoluteDataPath(relativePath: string): string {
@@ -55,8 +75,8 @@ function wordCount(content: string): number {
   return content.trim() ? content.trim().length : 0
 }
 
-export function listJournalEntries(input: ListJournalEntriesInput = {}): JournalEntry[] {
-  const limit = Math.min(Math.max(input.limit ?? 50, 1), 200)
+export function listJournalEntries(input: ListJournalEntriesInput = {}): Page<JournalEntry> {
+  const { limit, offset } = pagination(input, 50)
   const query = input.query?.trim()
   const conditions = [isNull(journalEntries.deletedAt)]
 
@@ -69,11 +89,17 @@ export function listJournalEntries(input: ListJournalEntriesInput = {}): Journal
     .select()
     .from(journalEntries)
     .where(and(...conditions))
-    .orderBy(desc(journalEntries.entryDate), desc(journalEntries.updatedAt))
+    .orderBy(desc(journalEntries.entryDate), desc(journalEntries.id))
     .limit(limit)
+    .offset(offset)
     .all()
 
-  return rows.map(toJournalEntry)
+  const total = getDb()
+    .select({ value: count() })
+    .from(journalEntries)
+    .where(and(...conditions))
+    .get()!.value
+  return { items: rows.map(toJournalEntry), total, hasMore: offset + rows.length < total }
 }
 
 export async function getJournalEntry(id: string): Promise<JournalEntryWithContent> {
@@ -85,50 +111,126 @@ export async function getJournalEntry(id: string): Promise<JournalEntryWithConte
   return { ...toJournalEntry(row), content }
 }
 
+export function getJournalStats(): JournalStats {
+  const today = localDate()
+  const result = getDb()
+    .select({
+      total: count(),
+      todayEntries: sql<number>`coalesce(sum(case when ${journalEntries.entryDate} = ${today} then 1 else 0 end), 0)`,
+      todayWords: sql<number>`coalesce(sum(case when ${journalEntries.entryDate} = ${today} then ${journalEntries.wordCount} else 0 end), 0)`
+    })
+    .from(journalEntries)
+    .where(isNull(journalEntries.deletedAt))
+    .get()!
+  return result
+}
+
+function cleanupFile(path: string): void {
+  try {
+    unlinkSync(path)
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      // Cleanup must not turn a committed save into an apparent failure.
+      console.warn('Could not remove journal staging file:', path, error)
+    }
+  }
+}
+
 export async function saveJournalEntry(
   input: SaveJournalEntryInput
 ): Promise<JournalEntryWithContent> {
-  const now = new Date().toISOString()
-  const title = sanitizeTitle(input.title)
-  const entryDate = input.entryDate ?? today()
-  const filePath = relativeJournalPath(entryDate)
-  const absolutePath = absoluteDataPath(filePath)
-  await mkdir(dirname(absolutePath), { recursive: true })
-  await writeFile(absolutePath, input.content, 'utf-8')
+  // This section intentionally has no awaits: concurrent IPC saves cannot interleave
+  // filesystem replacement and the synchronous SQLite transaction.
+  const db = getDb()
+  const existing =
+    input.id !== undefined
+      ? db.select().from(journalEntries).where(eq(journalEntries.id, input.id)).get()
+      : undefined
+  if (input.id !== undefined && (!existing || existing.deletedAt)) {
+    throw new Error('日志不存在')
+  }
 
-  const existing = input.id
-    ? getDb().select().from(journalEntries).where(eq(journalEntries.id, input.id)).get()
-    : getDb().select().from(journalEntries).where(eq(journalEntries.filePath, filePath)).get()
+  const now = new Date().toISOString()
+  const id = existing?.id ?? randomUUID()
+  const entryDate = existing?.entryDate ?? assertEntryDate(input.entryDate ?? localDate())
+  const filePath = existing?.filePath ?? relativeJournalPath(entryDate, id)
+  const collision = db
+    .select()
+    .from(journalEntries)
+    .where(eq(journalEntries.filePath, filePath))
+    .get()
+  if (collision && collision.id !== id) throw new Error('日志文件路径冲突')
 
   const row = {
-    id: existing?.id ?? randomUUID(),
-    title,
+    id,
+    title: sanitizeTitle(input.title),
     entryDate,
     filePath,
     excerpt: excerpt(input.content),
     wordCount: wordCount(input.content),
-    source: 'user',
+    source: existing?.source ?? 'user',
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
     deletedAt: null
   } satisfies typeof journalEntries.$inferInsert
 
-  if (existing) {
-    getDb().update(journalEntries).set(row).where(eq(journalEntries.id, existing.id)).run()
-  } else {
-    getDb().insert(journalEntries).values(row).run()
+  const absolutePath = absoluteDataPath(filePath)
+  const stagingId = randomUUID()
+  const temporaryPath = `${absolutePath}.${stagingId}.tmp`
+  const backupPath = `${absolutePath}.${stagingId}.bak`
+  let replaced = false
+  let backedUp = false
+  let restored = false
+  mkdirSync(dirname(absolutePath), { recursive: true })
+  try {
+    writeFileSync(temporaryPath, input.content, { encoding: 'utf-8', flag: 'wx' })
+    if (existing) {
+      // Keep the original bytes available until BOTH the row and activity log commit.
+      copyFileSync(absolutePath, backupPath, constants.COPYFILE_EXCL)
+      backedUp = true
+    }
+    db.transaction(() => {
+      if (existing) {
+        db.update(journalEntries).set(row).where(eq(journalEntries.id, id)).run()
+      } else {
+        db.insert(journalEntries).values(row).run()
+      }
+      createActivityLog({
+        type: 'journal',
+        action: existing ? 'updated' : 'created',
+        entityType: 'journal_entry',
+        entityId: id,
+        title: existing ? '日志已更新' : '新日志已存档',
+        detail: row.title,
+        source: 'user',
+        riskLevel: 'medium'
+      })
+      if (existing) {
+        renameSync(temporaryPath, absolutePath)
+      } else {
+        // Atomic no-clobber publication: even an unindexed file must not be overwritten.
+        linkSync(temporaryPath, absolutePath)
+      }
+      replaced = true
+    })
+  } catch (error) {
+    try {
+      if (replaced) {
+        if (backedUp) renameSync(backupPath, absolutePath)
+        else unlinkSync(absolutePath)
+      }
+      restored = true
+    } catch (restoreError) {
+      // Preserve the backup for manual recovery rather than deleting the last original.
+      throw new Error(`日志保存失败且无法自动恢复；请保留恢复文件 ${backupPath}`, {
+        cause: restoreError
+      })
+    }
+    throw error
+  } finally {
+    cleanupFile(temporaryPath)
+    if (backedUp && (!replaced || restored)) cleanupFile(backupPath)
   }
-
-  createActivityLog({
-    type: 'journal',
-    action: existing ? 'updated' : 'created',
-    entityType: 'journal_entry',
-    entityId: row.id,
-    title: existing ? '日志已更新' : '新日志已存档',
-    detail: title,
-    source: 'user',
-    riskLevel: 'medium'
-  })
-
+  if (backedUp) cleanupFile(backupPath)
   return { ...toJournalEntry(row), content: input.content }
 }

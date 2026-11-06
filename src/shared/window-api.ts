@@ -1,3 +1,6 @@
+import type { Page } from './models/page'
+import type { JournalStats } from './models/journal'
+import type { QuestStats } from './models/quest'
 import type { ApiResult } from './api-result'
 import type { ActivityLog, ListActivityLogsInput } from './models/activity'
 import type { BackupSummary } from './models/backup'
@@ -31,7 +34,8 @@ export interface WindowApi {
     getOverview(): Promise<ApiResult<PermissionOverview>>
   }
   quest: {
-    list(input?: ListQuestsInput): Promise<ApiResult<Quest[]>>
+    list(input?: ListQuestsInput): Promise<ApiResult<Page<Quest>>>
+    stats(): Promise<ApiResult<QuestStats>>
     create(input: CreateQuestInput): Promise<ApiResult<Quest>>
     update(input: UpdateQuestInput): Promise<ApiResult<Quest>>
     complete(id: string): Promise<ApiResult<Quest>>
@@ -39,7 +43,8 @@ export interface WindowApi {
     delete(id: string): Promise<ApiResult<void>>
   }
   journal: {
-    list(input?: ListJournalEntriesInput): Promise<ApiResult<JournalEntry[]>>
+    list(input?: ListJournalEntriesInput): Promise<ApiResult<Page<JournalEntry>>>
+    stats(): Promise<ApiResult<JournalStats>>
     get(id: string): Promise<ApiResult<JournalEntryWithContent>>
     save(input: SaveJournalEntryInput): Promise<ApiResult<JournalEntryWithContent>>
   }

@@ -18,7 +18,8 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux"
+    "build:linux": "npm run build && electron-builder --linux",
+    "test": "vitest run"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -37,16 +38,19 @@
     "@types/node": "^22.19.1",
     "@unocss/reset": "^66.10.5",
     "@vitejs/plugin-vue": "^6.0.2",
+    "@vue/test-utils": "^2.5.1",
     "drizzle-kit": "^0.31.11",
     "electron": "^39.2.6",
     "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",
     "eslint": "^9.39.1",
     "eslint-plugin-vue": "^10.6.2",
+    "happy-dom": "^21.0.4",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "unocss": "^66.10.5",
     "vite": "^7.2.6",
+    "vitest": "^5.1.0",
     "vue": "^3.5.25",
     "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^3.1.6"

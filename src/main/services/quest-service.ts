@@ -1,12 +1,16 @@
-import { and, desc, eq, isNull, ne } from 'drizzle-orm'
+import { and, count, desc, eq, isNull, ne, sql, type SQL } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { getDb } from '../db/client'
 import { quests } from '../db/schema'
 import { createActivityLog } from './activity-service'
+import { localDayBounds } from '../../shared/local-date'
+import type { Page } from '../../shared/models/page'
+import { pagination } from './pagination'
 import type {
   CreateQuestInput,
   ListQuestsInput,
   Quest,
+  QuestStats,
   QuestPriority,
   QuestSource,
   QuestStatus,
@@ -42,8 +46,29 @@ function assertTitle(title: string): string {
   return value
 }
 
-export function listQuests(input: ListQuestsInput = {}): Quest[] {
-  const limit = Math.min(Math.max(input.limit ?? 100, 1), 200)
+function dueToday(): SQL {
+  const { start, end } = localDayBounds()
+  return sql`julianday(${quests.dueAt}) >= julianday(${start}) and julianday(${quests.dueAt}) < julianday(${end})`
+}
+
+export function getQuestStats(): QuestStats {
+  const today = dueToday()
+  const row = getDb()
+    .select({
+      total: count(),
+      completed: sql<number>`coalesce(sum(case when ${quests.status} = 'done' then 1 else 0 end), 0)`,
+      open: sql<number>`coalesce(sum(case when ${quests.status} != 'done' then 1 else 0 end), 0)`,
+      todayOpen: sql<number>`coalesce(sum(case when ${quests.status} != 'done' and (${today}) then 1 else 0 end), 0)`,
+      todayCompleted: sql<number>`coalesce(sum(case when ${quests.status} = 'done' and (${today}) then 1 else 0 end), 0)`
+    })
+    .from(quests)
+    .where(isNull(quests.deletedAt))
+    .get()!
+  return row
+}
+
+export function listQuests(input: ListQuestsInput = {}): Page<Quest> {
+  const { limit, offset } = pagination(input, 100)
   const status = input.status ?? 'all'
   const conditions = [isNull(quests.deletedAt)]
 
@@ -53,15 +78,29 @@ export function listQuests(input: ListQuestsInput = {}): Quest[] {
     conditions.push(eq(quests.status, status))
   }
 
+  if (input.dueToday) conditions.push(dueToday())
+
   const rows = getDb()
     .select()
     .from(quests)
     .where(and(...conditions))
-    .orderBy(desc(quests.createdAt))
+    .orderBy(
+      sql`case when ${quests.status} = 'done' then 1 else 0 end`,
+      sql`coalesce(julianday(${quests.dueAt}), 1e99)`,
+      sql`case ${quests.priority} when 'urgent' then 0 when 'high' then 1 when 'normal' then 2 else 3 end`,
+      desc(quests.createdAt),
+      desc(quests.id)
+    )
     .limit(limit)
+    .offset(offset)
     .all()
 
-  return rows.map(toQuest)
+  const total = getDb()
+    .select({ value: count() })
+    .from(quests)
+    .where(and(...conditions))
+    .get()!.value
+  return { items: rows.map(toQuest), total, hasMore: offset + rows.length < total }
 }
 
 export function createQuest(input: CreateQuestInput): Quest {

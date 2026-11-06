@@ -19,6 +19,7 @@ export interface JournalEntryWithContent extends JournalEntry {
 
 export interface ListJournalEntriesInput {
   limit?: number
+  offset?: number
   query?: string
 }
 
@@ -27,4 +28,10 @@ export interface SaveJournalEntryInput {
   title: string
   entryDate?: string
   content: string
+}
+
+export interface JournalStats {
+  total: number
+  todayEntries: number
+  todayWords: number
 }

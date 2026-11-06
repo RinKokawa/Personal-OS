@@ -14,7 +14,11 @@ const saving = ref(false)
 const loading = ref(false)
 const editorMode = ref<'write' | 'preview'>('write')
 
-const selectedEntry = computed(() => entries.value.find((entry) => entry.id === selectedId.value))
+const selectedEntry = ref<JournalEntry | null>(null)
+const hasMore = ref(false)
+const matchingTotal = ref(0)
+const activeQuery = ref('')
+let loadVersion = 0
 const charCount = computed(() => content.value.trim().length)
 const lineCount = computed(() => (content.value ? content.value.split('\n').length : 0))
 
@@ -32,23 +36,38 @@ const previewBlocks = computed(() =>
   })
 )
 
-async function loadEntries(): Promise<void> {
+async function loadEntries(append = false): Promise<void> {
+  const version = ++loadVersion
   loading.value = true
+  if (!append) {
+    entries.value = []
+    hasMore.value = false
+    matchingTotal.value = 0
+    activeQuery.value = searchQuery.value.trim()
+  }
   try {
-    const result = await window.api.journal.list({ limit: 50, query: searchQuery.value.trim() })
+    const result = await window.api.journal.list({
+      limit: 50,
+      offset: append ? entries.value.length : 0,
+      query: activeQuery.value
+    })
+    if (version !== loadVersion) return
     if (result.ok) {
-      entries.value = result.data
+      entries.value = append ? [...entries.value, ...result.data.items] : result.data.items
+      hasMore.value = result.data.hasMore
+      matchingTotal.value = result.data.total
     } else {
       message.error(result.error.message)
     }
   } finally {
-    loading.value = false
+    if (version === loadVersion) loading.value = false
   }
 }
 
 async function openEntry(entry: JournalEntry): Promise<void> {
   const result = await window.api.journal.get(entry.id)
   if (result.ok) {
+    selectedEntry.value = result.data
     selectedId.value = result.data.id
     title.value = result.data.title
     content.value = result.data.content
@@ -60,6 +79,7 @@ async function openEntry(entry: JournalEntry): Promise<void> {
 
 function newEntry(): void {
   selectedId.value = null
+  selectedEntry.value = null
   title.value = ''
   content.value = ''
   editorMode.value = 'write'
@@ -85,13 +105,18 @@ async function saveEntry(): Promise<void> {
     })
 
     if (result.ok) {
+      selectedEntry.value = result.data
       selectedId.value = result.data.id
       title.value = result.data.title
       content.value = result.data.content
       message.success('系统日志已保存')
       await loadEntries()
     } else {
-      message.error(result.error.message)
+      message.error(
+        typeof result.error.detail === 'string'
+          ? `${result.error.message}：${result.error.detail}`
+          : result.error.message
+      )
     }
   } finally {
     saving.value = false
@@ -148,6 +173,7 @@ onMounted(loadEntries)
       >
       <input
         v-model="title"
+        :disabled="saving"
         class="mb-4 w-full border border-cyan-200/15 bg-[#0b141c] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-200/60"
         placeholder="为这段记忆命名…"
       />
@@ -158,6 +184,7 @@ onMounted(loadEntries)
       <textarea
         v-if="editorMode === 'write'"
         v-model="content"
+        :disabled="saving"
         class="min-h-90 w-full resize-y border border-cyan-200/15 bg-[#0b141c] px-4 py-3 font-mono text-sm leading-7 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-200/60"
         placeholder="今天发生了什么？发现了什么？有什么值得保存的想法？\n\n支持 Markdown 标题、列表、引用与分隔线。正文将保存为本地 .md 文件。"
       ></textarea>
@@ -210,7 +237,7 @@ onMounted(loadEntries)
           {{ charCount }} CHARS / {{ lineCount }} LINES / AUTOSAVE: NOT ENABLED
         </span>
         <div class="flex gap-3">
-          <NButton secondary @click="newEntry">新建</NButton>
+          <NButton secondary :disabled="saving" @click="newEntry">新建</NButton>
           <NButton type="primary" :loading="saving" @click="saveEntry">写入系统日志</NButton>
         </div>
       </div>
@@ -225,7 +252,7 @@ onMounted(loadEntries)
         <span
           class="border border-cyan-200/25 px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-cyan-200"
         >
-          {{ entries.length }} ENTRIES
+          {{ matchingTotal }} ENTRIES
         </span>
       </div>
 
@@ -234,14 +261,14 @@ onMounted(loadEntries)
           v-model:value="searchQuery"
           placeholder="搜索标题或摘要"
           clearable
-          @keyup.enter="loadEntries"
+          @keyup.enter="loadEntries()"
           @clear="clearSearch"
         />
-        <NButton secondary :loading="loading" @click="loadEntries">检索</NButton>
+        <NButton secondary :loading="loading" @click="loadEntries()">检索</NButton>
       </div>
 
       <div
-        v-if="loading"
+        v-if="loading && entries.length === 0"
         class="rounded border border-dashed border-cyan-200/15 px-6 py-10 text-center text-sm text-slate-500"
       >
         正在读取 MEMORY ARCHIVE...
@@ -256,11 +283,12 @@ onMounted(loadEntries)
         <button
           v-for="(entry, index) in entries"
           :key="entry.id"
+          :disabled="saving"
           class="block w-full border-t border-cyan-200/10 pt-5 text-left transition first:border-t-0 first:pt-0 hover:border-cyan-200/35"
           @click="openEntry(entry)"
         >
           <div class="font-mono text-[10px] tracking-[0.16em] text-cyan-200">
-            {{ entry.entryDate }} / ENTRY {{ String(entries.length - index).padStart(3, '0') }}
+            {{ entry.entryDate }} / ENTRY {{ String(matchingTotal - index).padStart(3, '0') }}
           </div>
           <h4 class="mt-2 text-sm font-semibold text-white">{{ entry.title }}</h4>
           <p class="mt-2 text-xs leading-6 text-slate-400">{{ entry.excerpt || '无摘要' }}</p>
@@ -268,6 +296,15 @@ onMounted(loadEntries)
             {{ entry.wordCount }} CHARS / {{ entry.filePath }}
           </div>
         </button>
+      </div>
+      <div
+        v-if="entries.length"
+        class="mt-5 flex items-center justify-between text-xs text-slate-400"
+      >
+        <span>已加载 {{ entries.length }} / {{ matchingTotal }} 篇</span>
+        <NButton v-if="hasMore" secondary :loading="loading" @click="loadEntries(true)"
+          >加载更多</NButton
+        >
       </div>
     </section>
   </div>

@@ -1,3 +1,4 @@
+import type { Page } from '../../shared/models/page'
 import { ipcMain } from 'electron'
 import { fail, ok, type ApiResult } from '../../shared/api-result'
 import { ipcChannels } from '../../shared/ipc'
@@ -5,6 +6,7 @@ import type {
   CreateQuestInput,
   ListQuestsInput,
   Quest,
+  QuestStats,
   UpdateQuestInput
 } from '../../shared/models/quest'
 import {
@@ -12,6 +14,7 @@ import {
   createQuest,
   deleteQuest,
   listQuests,
+  getQuestStats,
   reopenQuest,
   updateQuest
 } from '../services/quest-service'
@@ -21,13 +24,24 @@ function toErrorResult<T>(code: string, message: string, error: unknown): ApiRes
 }
 
 export function registerQuestIpc(): void {
-  ipcMain.handle(ipcChannels.quest.list, (_event, input?: ListQuestsInput): ApiResult<Quest[]> => {
+  ipcMain.handle(ipcChannels.quest.stats, (): ApiResult<QuestStats> => {
     try {
-      return ok(listQuests(input))
+      return ok(getQuestStats())
     } catch (error) {
-      return toErrorResult('QUEST_LIST_ERROR', '读取任务列表失败', error)
+      return toErrorResult('QUEST_STATS_ERROR', '读取统计失败', error)
     }
   })
+
+  ipcMain.handle(
+    ipcChannels.quest.list,
+    (_event, input?: ListQuestsInput): ApiResult<Page<Quest>> => {
+      try {
+        return ok(listQuests(input))
+      } catch (error) {
+        return toErrorResult('QUEST_LIST_ERROR', '读取任务列表失败', error)
+      }
+    }
+  )
 
   ipcMain.handle(ipcChannels.quest.create, (_event, input: CreateQuestInput): ApiResult<Quest> => {
     try {

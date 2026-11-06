@@ -19,7 +19,7 @@ PersonalOS/
 ├── personal.db
 ├── journal/
 │   └── YYYY/
-│       └── YYYY-MM-DD.md
+│       └── YYYY-MM-DD-<uuid>.md
 ├── notes/
 ├── attachments/
 ├── agent-logs/
@@ -249,6 +249,8 @@ export interface Quest {
 ## 8. `journal_entries`
 
 日志元数据表。正文保存在 Markdown 文件中。
+
+新日志按本地日历日期归档，文件名为 `YYYY-MM-DD-<uuid>.md`，允许同一天创建多篇。编辑时保留原记录的日期、路径、来源与创建时间；已有 `YYYY-MM-DD.md` 文件继续使用，不批量迁移。保存失败的恢复策略见 [回归测试与保存边界](testing.md)。
 
 ```sql
 CREATE TABLE journal_entries (

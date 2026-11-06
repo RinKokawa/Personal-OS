@@ -198,7 +198,7 @@ PersonalOS/
 ├── personal.db
 ├── journal/
 │   └── YYYY/
-│       └── YYYY-MM-DD.md
+│       └── YYYY-MM-DD-<uuid>.md
 ├── notes/
 ├── attachments/
 ├── agent-logs/
@@ -231,6 +231,7 @@ system:set-open-at-login
 system:set-global-shortcut-enabled
 
 quest:list
+quest:stats
 quest:create
 quest:update
 quest:complete
@@ -238,6 +239,7 @@ quest:reopen
 quest:delete
 
 journal:list
+journal:stats
 journal:get
 journal:save
 
@@ -287,7 +289,8 @@ UNKNOWN_ERROR          未知错误
 ### 7.2 Quest Service
 
 - 创建任务。
-- 查询任务。
+- 分页查询任务，先筛选并排序，再应用 `limit` / `offset`。
+- 从完整未删除数据中聚合任务统计。
 - 更新任务。
 - 完成 / 取消完成任务。
 - 删除任务。
@@ -295,11 +298,14 @@ UNKNOWN_ERROR          未知错误
 
 ### 7.3 Journal Service
 
-- 创建或更新 Markdown 日志文件。
-- 保存 SQLite 元数据。
-- 读取日志列表。
+- 同日本地日期下创建独立 Markdown 日志文件；编辑保留原日期和路径。
+- 暂存文件、备份原内容，在 SQLite 事务内更新元数据和活动日志；捕获失败时恢复文件。
+- 分页读取日志列表，返回 `items`、匹配总数 `total` 和 `hasMore`。
+- 独立聚合日志总数、今日日志数和字数。
 - 读取日志正文。
 - 写入活动日志。
+
+保存的故障恢复范围和测试方法见 [回归测试说明](testing.md)。`quest:list` 同样返回分页结构；`quest:stats` 和 `journal:stats` 不受列表页大小限制。
 
 ### 7.4 Activity Service
 
